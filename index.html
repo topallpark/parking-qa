@@ -125,4 +125,105 @@ function updateCatOrder(i, v) { categoryList[i].order = parseInt(v); }
 
 function saveConfigAndSync() {
     localStorage.setItem('gh_token', document.getElementById('ghToken').value);
-    localStorage.
+    localStorage.setItem('gh_repo', document.getElementById('ghRepo').value);
+    submitToCloud(); // 儲存類別變更
+}
+
+function render() {
+    const sortedCats = [...categoryList].sort((a,b) => a.order - b.order);
+    const catMap = {}; sortedCats.forEach(c => catMap[c.id] = c.name);
+    
+    document.getElementById('tagRow').innerHTML = `<span class="tag ${currentTag==='all'?'active':''}" onclick="setFilter('all')">全部</span>` + 
+        sortedCats.map(c => `<span class="tag ${currentTag===c.id?'active':''}" onclick="setFilter('${c.id}')">${c.name}</span>`).join('');
+
+    const kw = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = qaData.filter(d => (currentTag === 'all' || d.tag === currentTag) && (d.q.toLowerCase().includes(kw) || d.intro.toLowerCase().includes(kw)));
+
+    document.getElementById('qaList').innerHTML = filtered.map(item => `
+        <div class="qa-card" onclick="this.classList.toggle('open')">
+            <div class="qa-header">
+                <span class="q-badge">${catMap[item.tag] || '未知'}</span>
+                <span class="q-text">${item.q}</span>
+                ${adminMode ? `<button class="btn" onclick="event.stopPropagation();editItem(${item.id})">編輯</button>` : ''}
+            </div>
+            <div class="qa-body">
+                <div class="a-intro">話術：${item.intro}</div>
+                ${item.steps.map((s,i)=>`<div class="step"><div class="step-num">${i+1}</div><div>${s}</div></div>`).join('')}
+                <button class="btn btn-primary" style="width:100%" onclick="event.stopPropagation();copyText('${item.intro}\\n${item.steps.join('\\n')}')">複製話術</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function setFilter(t) { currentTag = t; render(); }
+function toggleAdmin() {
+    adminMode = !adminMode;
+    document.getElementById('adminBtn').textContent = adminMode ? '完成退出' : '進入後台';
+    if(adminMode) {
+        let btn = document.createElement('button');
+        btn.id = 'floatAdd'; btn.className = 'btn btn-primary';
+        btn.style = 'position:fixed; bottom:30px; right:30px; border-radius:50px; padding:15px 25px; box-shadow:0 10px 20px rgba(0,0,0,0.2)';
+        btn.textContent = '＋ 新增 SOP';
+        btn.onclick = () => { editingId=null; openQA(); };
+        document.body.appendChild(btn);
+    } else { document.getElementById('floatAdd')?.remove(); }
+    render();
+}
+
+function editItem(id) {
+    editingId = id;
+    const item = qaData.find(d => d.id === id);
+    document.getElementById('fTag').innerHTML = categoryList.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    document.getElementById('fTag').value = item.tag;
+    document.getElementById('fQ').value = item.q;
+    document.getElementById('fIntro').value = item.intro;
+    document.getElementById('fSteps').value = item.steps.join('\n');
+    openQA();
+}
+function openQA() { 
+    if(!editingId) {
+        document.getElementById('fQ').value = ''; document.getElementById('fIntro').value = ''; document.getElementById('fSteps').value = '';
+        document.getElementById('fTag').innerHTML = categoryList.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    }
+    document.getElementById('qaModal').classList.add('open'); 
+}
+function closeQA() { document.getElementById('qaModal').classList.remove('open'); }
+function closeConfig() { document.getElementById('configModal').classList.remove('open'); }
+
+async function submitToCloud() {
+    const token = localStorage.getItem('gh_token');
+    const repo = localStorage.getItem('gh_repo');
+    if(!token || !repo) return alert("請設定 Token");
+
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true; btn.textContent = "同步中...";
+
+    if(editingId || (!editingId && document.getElementById('fQ').value)) {
+        const newItem = { id: editingId || Date.now(), tag: document.getElementById('fTag').value, q: document.getElementById('fQ').value, intro: document.getElementById('fIntro').value, steps: document.getElementById('fSteps').value.split('\n').filter(x=>x.trim()) };
+        if(editingId) qaData[qaData.findIndex(d => d.id === editingId)] = newItem;
+        else qaData.push(newItem);
+    }
+
+    try {
+        const url = `https://api.github.com/repos/${repo}/contents/index.html`;
+        const res = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+        const fileData = await res.json();
+        const oldContent = decodeURIComponent(escape(atob(fileData.content)));
+        const newCode = `// --- 資料區 ---\nlet categoryList = ${JSON.stringify(categoryList)};\nlet qaData = ${JSON.stringify(qaData)};\n\n// --- 初始化變數 ---`;
+        const newFull = oldContent.substring(0, oldContent.indexOf("// --- 資料區")) + newCode + oldContent.substring(oldContent.indexOf("// --- 初始化變數 ---"));
+
+        await fetch(url, {
+            method: 'PUT',
+            headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'Update Data', content: btoa(unescape(encodeURIComponent(newFull))), sha: fileData.sha })
+        });
+        alert("✅ 同步成功！"); closeQA(); closeConfig(); render();
+    } catch (e) { alert("同步失敗！"); } finally { btn.disabled = false; btn.textContent = "更新雲端"; }
+}
+
+function copyText(txt) { navigator.clipboard.writeText(txt.replace(/\\n/g, '\n')); alert('已複製！'); }
+if(localStorage.getItem('gh_token')) document.getElementById('adminBtnContainer').style.display = 'block';
+render();
+</script>
+</body>
+</html>
