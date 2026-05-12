@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>全之駐停車場-客服應對SOP</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏯</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231A56DB%22/><text y=%22.75em%22 x=%2250%22 font-family=%22Arial%22 font-weight=%22bold%22 font-size=%2270%22 text-anchor=%22middle%22 fill=%22white%22>P</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* 基礎樣式與變數 */
@@ -15,7 +15,8 @@
         /* 導航欄 */
         header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
         .logo{display:flex;align-items:center;gap:12px;cursor:pointer}
-        .logo img{width:35px;height:35px;border-radius:50%;object-fit:cover}
+        /* 藍色 P 字標誌樣式 */
+        .logo-box{background:var(--accent);color:white;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:bold;font-size:18px}
         
         /* 主要容器 */
         main{max-width:850px;margin:24px auto;padding:0 20px}
@@ -58,7 +59,6 @@
         .btn-ghost{background:#F3F4F6;color:#4B5563}
         .btn-danger{background:#FEE2E2;color:#DC2626;font-size:12px;padding:4px 8px}
         
-        /* 隱藏式開發者區塊 */
         .dev-section{margin-top:20px;border:1px solid #EEE;padding:15px;border-radius:10px;background:#FAFAFA}
         .dev-title{font-size:12px;color:#999;cursor:pointer;display:flex;justify-content:space-between}
         .dev-content{display:none;margin-top:10px}
@@ -73,7 +73,7 @@
 
 <header>
     <div class="logo" onclick="location.reload()">
-        <img src="https://raw.githubusercontent.com/topallpark/parking-qa/main/1121213%E5%85%A8%E4%B9%8B%E9%A7%90LOGO-001.jpg" alt="Logo" onerror="this.src='https://www.google.com/s2/favicons?domain=github.com&sz=64'">
+        <div class="logo-box">P</div>
         <strong style="font-size:18px; letter-spacing:1px">全之駐停車場</strong>
     </div>
     <div>
@@ -242,7 +242,7 @@ function closeQA() { document.getElementById('qaModal').classList.remove('open')
 
 async function submitToCloud(isAdminSave = false) {
     const token = localStorage.getItem('gh_token');
-    if(!token) return alert("請先填寫 GitHub 通行證");
+    if(!token) return alert("請先在開發者設置中填寫 GitHub 通行證");
 
     if(!isAdminSave) {
         const convs = Array.from(document.querySelectorAll('.edit-conv-item')).map(item => ({
@@ -254,4 +254,33 @@ async function submitToCloud(isAdminSave = false) {
         else qaData.push(newItem);
     }
 
-    const btn = document.
+    const btn = document.getElementById('saveBtn');
+    if(btn) { btn.disabled = true; btn.textContent = "連線中..."; }
+
+    try {
+        const url = `https://api.github.com/repos/topallpark/parking-qa/contents/index.html`;
+        const res = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+        const fileData = await res.json();
+        const oldContent = decodeURIComponent(escape(atob(fileData.content)));
+        
+        const dataMarker = "// --- 資料儲存區";
+        const endMarker = "// --- 邏輯處理";
+        const newDataCode = `// --- 資料儲存區 (自動更新) ---\nlet categories = ${JSON.stringify(categories)};\nlet qaData = ${JSON.stringify(qaData)};\n\n`;
+        const newFull = oldContent.substring(0, oldContent.indexOf(dataMarker)) + newDataCode + oldContent.substring(oldContent.indexOf(endMarker));
+
+        await fetch(url, {
+            method: 'PUT',
+            headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'Update Data', content: btoa(unescape(encodeURIComponent(newFull))), sha: fileData.sha })
+        });
+        alert("✅ 同步成功！網頁稍後將自動更新。");
+        document.querySelectorAll('.modal-bg').forEach(m => m.classList.remove('open'));
+        render();
+    } catch (e) { alert("同步失敗，請檢查 Token 是否正確。"); }
+    finally { if(btn) { btn.disabled = false; btn.textContent = "更新至雲端倉庫"; } }
+}
+
+render();
+</script>
+</body>
+</html>
