@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>停車場客服 SOP 快查系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F4F0;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.1);
+    --border-hover: rgba(0,0,0,0.2);
+    --text: #1A1A1A;
+    --text-muted: #6B6B6B;
+    --text-hint: #ABABAB;
+    --accent: #1A56DB;
+    --accent-light: #EEF3FF;
+    --tag-gate-bg: #FEF2F2; --tag-gate-text: #991B1B;
+    --tag-fee-bg: #FFFBEB; --tag-fee-text: #92400E;
+    --tag-ticket-bg: #ECFDF5; --tag-ticket-text: #065F46;
+    --tag-other-bg: #EFF6FF; --tag-other-text: #1E40AF;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-icon {
+    width: 30px; height: 30px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .header-icon svg { width: 16px; height: 16px; fill: white; }
+
+  header h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .header-sub {
+    font-size: 12px;
+    color: var(--text-hint);
+    margin-left: 2px;
+  }
+
+  .count-badge {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg);
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  .search-box {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    margin-bottom: 14px;
+    transition: border-color 0.15s;
+    box-shadow: var(--shadow);
+  }
+  .search-box:focus-within { border-color: var(--accent); }
+  .search-box svg { width: 17px; height: 17px; stroke: var(--text-hint); flex-shrink: 0; }
+  .search-box input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    width: 100%;
+    height: 44px;
+  }
+  .search-box input::placeholder { color: var(--text-hint); }
+  .clear-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-hint); padding: 4px; display: none; align-items: center;
+    border-radius: 4px;
+  }
+  .clear-btn:hover { color: var(--text-muted); }
+  .clear-btn.visible { display: flex; }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .tag {
+    font-size: 13px;
+    padding: 5px 13px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+    user-select: none;
+  }
+  .tag:hover { border-color: var(--border-hover); color: var(--text); }
+  .tag.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-hint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .qa-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .qa-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s;
+  }
+  .qa-card:hover { border-color: var(--border-hover); }
+
+  .qa-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .q-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  .q-badge.gate { background: var(--tag-gate-bg); color: var(--tag-gate-text); }
+  .q-badge.fee { background: var(--tag-fee-bg); color: var(--tag-fee-text); }
+  .q-badge.ticket { background: var(--tag-ticket-bg); color: var(--tag-ticket-text); }
+  .q-badge.other { background: var(--tag-other-bg); color: var(--tag-other-text); }
+
+  .q-text {
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+    color: var(--text);
+  }
+
+  .chevron {
+    width: 16px; height: 16px;
+    stroke: var(--text-hint);
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .qa-card.open .chevron { transform: rotate(180deg); }
+
+  .qa-body {
+    border-top: 1px solid var(--border);
+    padding: 16px;
+    display: none;
+    background: #FAFAFA;
+  }
+  .qa-card.open .qa-body { display: block; }
+
+  .a-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-hint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .a-intro {
+    font-size: 13.5px;
+    color: var(--text);
+    margin-bottom: 12px;
+    padding: 10px 13px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+    line-height: 1.65;
+  }
+
+  .steps { display: flex; flex-direction: column; gap: 8px; }
+
+  .step {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-text {
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.65;
+  }
+  .step-text strong { font-weight: 700; color: var(--text); }
+
+  .action-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 6px 13px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: white;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .copy-btn.copied { background: var(--tag-ticket-bg); color: var(--tag-ticket-text); border-color: #A7F3D0; }
+  .copy-btn svg { width: 13px; height: 13px; stroke: currentColor; }
+
+  .empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-hint);
+    font-size: 14px;
+  }
+  .empty svg { width: 32px; height: 32px; stroke: var(--text-hint); margin-bottom: 10px; display: block; margin-inline: auto; }
+
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-hint);
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 14px; }
+    .header-sub { display: none; }
+    main { padding: 16px 12px 48px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">
+    <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v14l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+  </div>
+  <h1>停車場客服 SOP</h1>
+  <span class="header-sub">快查系統</span>
+  <span class="count-badge" id="countBadge">共 8 項</span>
+</header>
+
+<main>
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" id="searchInput" placeholder="輸入關鍵字，例如：柵門、繳費、發票…" oninput="onSearch()">
+    <button class="clear-btn" id="clearBtn" onclick="clearSearch()" aria-label="清除搜尋">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" width="14" height="14">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="tag-row" id="tagRow"></div>
+
+  <div class="section-label" id="sectionLabel">所有問題</div>
+  <div class="qa-list" id="qaList"></div>
+</main>
+
+<footer>停車場客服 SOP 快查系統 &nbsp;·&nbsp; 如需新增或修改問題，請聯絡系統管理員</footer>
+
+<script>
+const qaData = [
+  {
+    id: 1, tag: "gate", tagLabel: "柵門問題",
+    q: "柵門打不開",
+    intro: "你好，請問有繳費了嗎？",
+    steps: [
+      { text: "<strong>尚未繳費：</strong>請提供車牌號碼，我先幫您開門，請先停到旁邊空地，再前往繳費機完成繳費。" },
+      { text: "<strong>已繳費但打不開：</strong>請提供車牌號碼，我幫您確認繳費紀錄並手動開門，請稍候。" }
+    ]
+  },
+  {
+    id: 2, tag: "gate", tagLabel: "柵門問題",
+    q: "入場柵門感應不到票券 / 車牌",
+    intro: "您好，請問您使用的是哪種入場方式（取票、月租、車牌辨識）？",
+    steps: [
+      { text: "<strong>取票式：</strong>請確認按鈕是否按下，若機器無反應請告知車道號碼，我手動開門並通知維修。" },
+      { text: "<strong>月租 / 車牌辨識：</strong>請提供車牌，我手動開門後幫您查詢辨識異常原因。" }
+    ]
+  },
+  {
+    id: 3, tag: "fee", tagLabel: "繳費問題",
+    q: "繳費機故障 / 無法繳費",
+    intro: "非常抱歉造成您的不便，請問您停放的車牌號碼為何？",
+    steps: [
+      { text: "確認停車時數與應繳金額，告知用戶正確費用。" },
+      { text: "<strong>改為人工收費：</strong>請至管理室窗口繳費，或提供其他可用繳費機台位置。" },
+      { text: "協助手動開門放行，紀錄故障時間並回報維修。" }
+    ]
+  },
+  {
+    id: 4, tag: "fee", tagLabel: "繳費問題",
+    q: "費用計算有誤 / 覺得收費太貴",
+    intro: "您好，請問您的車牌號碼與入場時間？我幫您確認計費紀錄。",
+    steps: [
+      { text: "查詢入場時間與計費明細，向用戶說明計費規則（例如：每 30 分鐘計算一次）。" },
+      { text: "<strong>如確認計費有誤：</strong>協助更正並致歉，記錄異常回報主管。" },
+      { text: "<strong>如計費正確：</strong>耐心說明計費方式，提供收據供用戶留存。" }
+    ]
+  },
+  {
+    id: 5, tag: "ticket", tagLabel: "票券 / 發票",
+    q: "停車票據遺失",
+    intro: "您好，請問您的入場時間與車牌號碼？",
+    steps: [
+      { text: "查詢入場紀錄，確認停車時數。" },
+      { text: "依系統紀錄計費，說明遺失票據補辦流程或補發收據。" }
+    ]
+  },
+  {
+    id: 6, tag: "ticket", tagLabel: "票券 / 發票",
+    q: "需要停車發票 / 收據",
+    intro: "您好，請問您需要電子發票還是紙本收據？",
+    steps: [
+      { text: "<strong>電子發票：</strong>請提供載具條碼，系統開立後傳送至您的手機。" },
+      { text: "<strong>紙本收據：</strong>請至管理室窗口索取，需攜帶繳費憑證。" }
+    ]
+  },
+  {
+    id: 7, tag: "other", tagLabel: "其他",
+    q: "車輛在停車場內發生事故 / 刮傷",
+    intro: "非常抱歉發生這樣的狀況，請您先保持冷靜，確認人員是否安全。",
+    steps: [
+      { text: "請雙方先不要移動車輛，於現場等候。" },
+      { text: "調閱該區域監視錄影（請告知車道或停車格號碼），協助釐清狀況。" },
+      { text: "提供管理室聯絡電話，必要時協助通報警方處理。" }
+    ]
+  },
+  {
+    id: 8, tag: "other", tagLabel: "其他",
+    q: "車輛被其他車輛擋住無法離場",
+    intro: "您好，請提供您的停車位置與擋車車牌號碼（如可辨識）。",
+    steps: [
+      { text: "廣播通知擋車車主移車（廣播次數依規定執行）。" },
+      { text: "若 10 分鐘內無人移車，通知主管啟動後續處理程序（拖吊聯絡等）。" },
+      { text: "協助用戶留下聯絡方式，待問題解決後主動回電告知。" }
+    ]
+  }
+];
+
+const tags = [
+  { key: "all", label: "全部" },
+  { key: "gate", label: "柵門問題" },
+  { key: "fee", label: "繳費問題" },
+  { key: "ticket", label: "票券 / 發票" },
+  { key: "other", label: "其他" }
+];
+
+let activeTag = "all";
+let openId = null;
+
+function renderTags() {
+  document.getElementById("tagRow").innerHTML = tags.map(t =>
+    `<span class="tag${activeTag === t.key ? " active" : ""}" onclick="setTag('${t.key}')">${t.label}</span>`
+  ).join("");
+}
+
+function setTag(key) {
+  activeTag = key;
+  renderTags();
+  renderList();
+}
+
+function onSearch() {
+  const val = document.getElementById("searchInput").value;
+  document.getElementById("clearBtn").classList.toggle("visible", val.length > 0);
+  renderList();
+}
+
+function clearSearch() {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("clearBtn").classList.remove("visible");
+  renderList();
+}
+
+function getFiltered() {
+  const kw = document.getElementById("searchInput").value.trim().toLowerCase();
+  return qaData.filter(item => {
+    const tagMatch = activeTag === "all" || item.tag === activeTag;
+    const kwMatch = !kw || item.q.toLowerCase().includes(kw) ||
+      item.intro.toLowerCase().includes(kw) ||
+      item.steps.some(s => s.text.toLowerCase().includes(kw));
+    return tagMatch && kwMatch;
+  });
+}
+
+function toggle(id) {
+  const card = document.querySelector(`.qa-card[data-id="${id}"]`);
+  if (!card) return;
+  const wasOpen = card.classList.contains("open");
+  document.querySelectorAll(".qa-card.open").forEach(c => c.classList.remove("open"));
+  if (!wasOpen) card.classList.add("open");
+}
+
+function copyScript(id) {
+  const item = qaData.find(d => d.id === id);
+  if (!item) return;
+  let text = item.intro + "\n";
+  item.steps.forEach((s, i) => {
+    text += `\n${i + 1}. ${s.text.replace(/<[^>]+>/g, "")}`;
+  });
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById("copy-" + id);
+    if (!btn) return;
+    btn.classList.add("copied");
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> 已複製`;
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> 複製話術`;
+    }, 2000);
+  });
+}
+
+function renderList() {
+  const filtered = getFiltered();
+  const label = document.getElementById("sectionLabel");
+  const kw = document.getElementById("searchInput").value.trim();
+
+  if (kw) {
+    label.textContent = `搜尋「${kw}」— 共 ${filtered.length} 項結果`;
+  } else {
+    const tagObj = tags.find(t => t.key === activeTag);
+    label.textContent = tagObj ? `${tagObj.label} — 共 ${filtered.length} 項` : `共 ${filtered.length} 項`;
+  }
+
+  document.getElementById("countBadge").textContent = `共 ${qaData.length} 項`;
+
+  if (!filtered.length) {
+    document.getElementById("qaList").innerHTML = `
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        找不到相關問題
+      </div>`;
+    return;
+  }
+
+  document.getElementById("qaList").innerHTML = filtered.map(item => `
+    <div class="qa-card" data-id="${item.id}">
+      <div class="qa-header" onclick="toggle(${item.id})" role="button" tabindex="0">
+        <span class="q-badge ${item.tag}">${item.tagLabel}</span>
+        <span class="q-text">${item.q}</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+      <div class="qa-body">
+        <div class="a-section-label">標準回覆話術</div>
+        <div class="a-intro">${item.intro}</div>
+        <div class="steps">
+          ${item.steps.map((s, i) => `
+            <div class="step">
+              <div class="step-num">${i + 1}</div>
+              <div class="step-text">${s.text}</div>
+            </div>`).join("")}
+        </div>
+        <div class="action-row">
+          <button class="copy-btn" id="copy-${item.id}" onclick="copyScript(${item.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+            複製話術
+          </button>
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+renderTags();
+renderList();
+</script>
+</body>
+</html>
