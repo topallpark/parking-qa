@@ -6,54 +6,35 @@
     <title>停車場客服 SOP 系統</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* --- 質感介面設計 --- */
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         :root{ --bg:#F8F9FA; --surface:#FFF; --accent:#1A56DB; --text:#1F2937; --border:#E5E7EB; --r:12px; }
         body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding-bottom:60px}
-        
-        header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;position:sticky;top:0;z-index:100;justify-content:space-between;box-shadow:0 1px 2px rgba(0,0,0,0.03)}
-        .logo-area{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
-        .logo-icon{background:var(--accent);color:white;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:bold;font-size:18px}
-        
+        header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;position:sticky;top:0;z-index:100;justify-content:space-between}
+        .logo-area{display:flex;align-items:center;gap:10px;cursor:pointer}
+        .logo-icon{background:var(--accent);color:white;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:bold}
         main{max-width:800px;margin:24px auto;padding:0 20px}
-        
-        /* 搜尋框與流暢標籤 */
-        .search-container{background:white;border:2px solid var(--border);border-radius:var(--r);padding:4px 18px;margin-bottom:20px;transition:0.2s;display:flex;align-items:center}
-        .search-container:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px rgba(26,86,219,0.1)}
-        .search-container input{border:none;outline:none;width:100%;height:48px;font-size:16px;font-family:inherit}
-
+        .search-container{background:white;border:2px solid var(--border);border-radius:var(--r);padding:4px 18px;margin-bottom:20px;display:flex;align-items:center}
+        .search-container input{border:none;outline:none;width:100%;height:48px;font-size:16px}
         .tag-row{margin-bottom:24px;display:flex;gap:10px;flex-wrap:wrap}
-        .tag{padding:8px 18px;background:white;border:1px solid var(--border);border-radius:50px;font-size:14px;cursor:pointer;transition:0.2s;color:#4B5563;font-weight:500}
-        .tag:hover{background:#F3F4F6}
-        .tag.active{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 4px 10px rgba(26,86,219,0.2)}
-
-        /* QA 卡片流暢感 */
-        .qa-card{background:white;border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;transition:0.2s;cursor:pointer;overflow:hidden}
-        .qa-card:hover{border-color:#D1D5DB;transform:translateY(-1px);box-shadow:0 4px 6px rgba(0,0,0,0.05)}
+        .tag{padding:8px 18px;background:white;border:1px solid var(--border);border-radius:50px;font-size:14px;cursor:pointer;transition:0.2s}
+        .tag.active{background:var(--accent);color:white;border-color:var(--accent)}
+        .qa-card{background:white;border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;cursor:pointer}
         .qa-header{padding:16px 20px;display:flex;align-items:center;gap:12px}
-        .q-badge{font-size:11px;background:#EFF6FF;color:var(--accent);padding:4px 10px;border-radius:6px;font-weight:700;text-transform:uppercase}
+        .q-badge{font-size:11px;background:#EFF6FF;color:var(--accent);padding:4px 10px;border-radius:6px;font-weight:700}
         .q-text{flex:1;font-weight:700;font-size:16px}
-        .qa-body{padding:20px;display:none;background:#F9FAFB;border-top:1px solid var(--border);animation:slideDown 0.2s ease-out}
+        .qa-body{padding:20px;display:none;background:#F9FAFB;border-top:1px solid var(--border)}
         .qa-card.open .qa-body{display:block}
-        
-        @keyframes slideDown{ from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
-
-        .a-intro{background:white;padding:14px;border-left:4px solid var(--accent);margin-bottom:16px;font-size:15px;border-radius:6px;box-shadow:0 1px 2px rgba(0,0,0,0.05);color:#374151}
-        .step{display:flex;gap:12px;margin-bottom:10px;font-size:15px}
+        .a-intro{background:white;padding:14px;border-left:4px solid var(--accent);margin-bottom:16px;font-size:15px;border-radius:6px}
+        .step{display:flex;gap:12px;margin-bottom:10px}
         .step-num{width:24px;height:24px;background:#DBEAFE;color:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0}
-
-        /* 介面按鈕 */
-        .btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;transition:0.2s;font-family:inherit}
+        .btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500}
         .btn-primary{background:var(--accent);color:white;border:none}
-        .btn-primary:hover{opacity:0.9}
-
-        /* 彈窗設計 */
         .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;z-index:200}
         .modal-bg.open{display:flex}
-        .modal{background:white;padding:28px;border-radius:16px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25)}
+        .modal{background:white;padding:28px;border-radius:16px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto}
         .field{margin-bottom:18px}
-        .field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:#4B5563}
-        .field input, .field select, .field textarea{width:100%;padding:10px;border:1px solid #D1D5DB;border-radius:8px;font-size:15px;font-family:inherit}
+        .field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+        .field input, .field select, .field textarea{width:100%;padding:10px;border:1px solid #D1D5DB;border-radius:8px;font-size:15px}
     </style>
 </head>
 <body>
@@ -61,7 +42,7 @@
 <header>
     <div class="logo-area" onclick="countLogoClick()">
         <div class="logo-icon">P</div>
-        <strong style="font-size:18px; letter-spacing:-0.5px">停車場 SOP 系統</strong>
+        <strong style="font-size:18px">停車場 SOP 系統</strong>
     </div>
     <div id="adminBtnContainer" style="display:none">
         <button class="btn btn-primary" onclick="toggleAdmin()" id="adminBtn">進入後台</button>
@@ -69,43 +50,79 @@
 </header>
 
 <main>
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="搜尋問題或關鍵字..." oninput="render()">
-    </div>
+    <div class="search-container"><input type="text" id="searchInput" placeholder="搜尋關鍵字..." oninput="render()"></div>
     <div class="tag-row" id="tagRow"></div>
     <div id="qaList"></div>
 </main>
 
 <div class="modal-bg" id="configModal">
     <div class="modal">
-        <h3>⚙️ GitHub 自動同步設定</h3>
-        <p style="font-size:13px; color:#6B6B6B; margin-bottom:20px">設定後，此裝置將開啟管理權限。</p>
-        <div class="field"><label>Token (Fine-grained)</label><input type="password" id="ghToken"></div>
-        <div class="field"><label>倉庫路徑 (帳號/倉庫)</label><input type="text" id="ghRepo"></div>
-        <div style="display:flex; gap:10px">
+        <h3>⚙️ 管理員設定</h3>
+        <div class="field"><label>GitHub Token</label><input type="password" id="ghToken"></div>
+        <div class="field"><label>倉庫 (帳號/倉庫名)</label><input type="text" id="ghRepo"></div>
+        <hr style="margin:15px 0">
+        <h4>類別順序管理</h4>
+        <div id="catManager"></div>
+        <div style="display:flex; gap:10px; margin-top:20px">
             <button class="btn" style="flex:1" onclick="closeConfig()">關閉</button>
-            <button class="btn btn-primary" style="flex:1" onclick="saveConfig()">儲存設定</button>
+            <button class="btn btn-primary" style="flex:1" onclick="saveConfigAndSync()">儲存並更新雲端</button>
         </div>
     </div>
 </div>
 
 <div class="modal-bg" id="qaModal">
     <div class="modal">
-        <h3 id="mTitle">編輯內容</h3>
-        <div class="field"><label>問題類別</label><select id="fTag"></select></div>
-        <div class="field"><label>問題名稱</label><input type="text" id="fQ"></div>
-        <div class="field"><label>對話話術</label><input type="text" id="fIntro"></div>
-        <div class="field"><label>處理步驟 (每行一動)</label><textarea id="fSteps" style="height:120px"></textarea></div>
+        <h3 id="mTitle">編輯 SOP</h3>
+        <div class="field"><label>類別</label><select id="fTag"></select></div>
+        <div class="field"><label>問題</label><input type="text" id="fQ"></div>
+        <div class="field"><label>話術</label><input type="text" id="fIntro"></div>
+        <div class="field"><label>步驟</label><textarea id="fSteps" style="height:100px"></textarea></div>
         <div style="display:flex; gap:10px">
             <button class="btn" style="flex:1" onclick="closeQA()">取消</button>
-            <button class="btn btn-primary" style="flex:1" id="saveBtn" onclick="submitToCloud('sop')">更新並發布</button>
+            <button class="btn btn-primary" style="flex:1" id="saveBtn" onclick="submitToCloud()">更新雲端</button>
         </div>
-        ${editingId ? `<button onclick="deleteItem()" style="width:100%; margin-top:15px; color:red; background:none; border:none; cursor:pointer; font-size:13px">刪除此項目</button>` : ''}
     </div>
 </div>
 
 <script>
-// --- 資料區 (可自動同步) ---
+// --- 資料區 (手動更新一次，之後自動儲存) ---
 let categoryList = [
     {id:"gate", name:"柵門問題", order:1},
-    {id
+    {id:"fee", name:"繳費問題", order:2},
+    {id:"ticket", name:"發票/載具", order:3},
+    {id:"other", name:"其他", order:4}
+];
+let qaData = [];
+
+// --- 初始化變數 ---
+let adminMode = false;
+let editingId = null;
+let logoClicks = 0;
+let currentTag = 'all';
+
+function countLogoClick() {
+    logoClicks++;
+    if (logoClicks >= 5) {
+        document.getElementById('configModal').classList.add('open');
+        document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
+        document.getElementById('ghRepo').value = localStorage.getItem('gh_repo') || '';
+        renderCatManager();
+        logoClicks = 0;
+    }
+}
+
+function renderCatManager() {
+    const div = document.getElementById('catManager');
+    div.innerHTML = categoryList.map((c, i) => `
+        <div style="display:flex; gap:5px; margin-bottom:5px">
+            <input type="text" value="${c.name}" onchange="updateCatName(${i}, this.value)" style="flex:2">
+            <input type="number" value="${c.order}" onchange="updateCatOrder(${i}, this.value)" style="flex:1" title="顯示順序">
+        </div>
+    `).join('');
+}
+function updateCatName(i, v) { categoryList[i].name = v; }
+function updateCatOrder(i, v) { categoryList[i].order = parseInt(v); }
+
+function saveConfigAndSync() {
+    localStorage.setItem('gh_token', document.getElementById('ghToken').value);
+    localStorage.
