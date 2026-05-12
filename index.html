@@ -15,7 +15,6 @@
         /* 導航欄 */
         header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
         .logo{display:flex;align-items:center;gap:12px;cursor:pointer}
-        /* 藍色 P 字標誌樣式 */
         .logo-box{background:var(--accent);color:white;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:bold;font-size:18px}
         
         /* 主要容器 */
@@ -38,7 +37,7 @@
         .qa-body{padding:0 24px 24px;display:none;background:#FAFBFF;border-top:1px solid var(--border);animation:fadeIn 0.3s}
         .qa-card.open .qa-body{display:block}
         
-        /* 對話組樣式 */
+        /* 對話展示樣式 */
         .conv-group{background:white;border:1px solid var(--border);padding:15px;border-radius:8px;margin-top:15px}
         .conv-label{font-size:12px;font-weight:bold;color:var(--accent);margin-bottom:8px;display:block}
         .conv-intro{background:#F3F4F6;padding:10px;border-radius:6px;margin-bottom:10px;font-size:15px;border-left:4px solid var(--accent)}
@@ -48,24 +47,25 @@
         /* 彈窗樣式 */
         .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;z-index:200}
         .modal-bg.open{display:flex}
-        .modal{background:white;padding:30px;border-radius:20px;width:95%;max-width:600px;max-height:85vh;overflow-y:auto}
+        .modal{background:white;padding:30px;border-radius:20px;width:95%;max-width:650px;max-height:85vh;overflow-y:auto}
         .field{margin-bottom:20px}
         .field label{display:block;font-size:14px;font-weight:700;margin-bottom:8px}
         .field input, .field select, .field textarea{width:100%;padding:12px;border:1px solid #D1D5DB;border-radius:10px;font-size:15px;font-family:inherit}
         
-        /* 按鈕與後台 */
+        /* 編輯區域對話組樣式 */
+        .edit-conv-item{border:2px solid #E5E7EB;padding:20px;border-radius:15px;margin-bottom:20px;position:relative;background:#FFF}
+        .step-input-group{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+        .step-number-label{width:24px;font-weight:bold;color:var(--accent);font-size:14px}
+        .btn-add-step{background:#EEF2FF;color:var(--accent);width:100%;padding:8px;margin-top:10px;font-size:13px;border-radius:8px;border:1px dashed var(--accent);cursor:pointer;font-weight:bold}
+        .btn-add-step:hover{background:var(--accent);color:white}
+
+        /* 按鈕樣式 */
         .btn{padding:10px 20px;border-radius:10px;cursor:pointer;font-weight:600;border:none;transition:0.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
         .btn-primary{background:var(--accent);color:white}
         .btn-ghost{background:#F3F4F6;color:#4B5563}
-        .btn-danger{background:#FEE2E2;color:#DC2626;font-size:12px;padding:4px 8px}
+        .btn-danger-small{background:none;color:#999;border:none;cursor:pointer;padding:4px}
+        .btn-danger-small:hover{color:red}
         
-        .dev-section{margin-top:20px;border:1px solid #EEE;padding:15px;border-radius:10px;background:#FAFAFA}
-        .dev-title{font-size:12px;color:#999;cursor:pointer;display:flex;justify-content:space-between}
-        .dev-content{display:none;margin-top:10px}
-        .dev-content.show{display:block}
-
-        .edit-conv-item{border:1px dashed #CCC;padding:15px;border-radius:10px;margin-bottom:15px;position:relative;background:#F9FAFB}
-
         @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
     </style>
 </head>
@@ -95,31 +95,18 @@
             <h2 style="font-size:22px">系統管理</h2>
             <button class="btn btn-primary" onclick="openQA()">＋ 新增 SOP 問題</button>
         </div>
-
-        <div class="field" style="margin-bottom:30px">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px">
-                <label style="margin:0">類別排序管理</label>
-                <button class="btn btn-ghost" style="font-size:12px; padding:2px 8px" onclick="addNewCategory()">+ 新增類別</button>
-            </div>
+        <div class="field">
+            <label>類別與排序管理</label>
             <div id="categoryManagerList" style="background:#F9FAFB; padding:15px; border-radius:10px; border:1px solid #EEE"></div>
+            <button class="btn btn-ghost" style="width:100%; margin-top:10px; font-size:12px" onclick="addNewCategory()">+ 新增類別</button>
         </div>
-
-        <div class="dev-section">
-            <div class="dev-title" onclick="document.querySelector('.dev-content').classList.toggle('show')">
-                <span>🛠️ 開發者設置 (GitHub Token)</span>
-                <span>▼</span>
-            </div>
-            <div class="dev-content">
-                <div class="field" style="margin-top:10px">
-                    <label style="font-size:12px">GitHub 通行證 (Token)</label>
-                    <input type="password" id="ghToken" placeholder="請在此輸入以啟用雲端同步...">
-                </div>
-            </div>
+        <div class="field">
+            <label>GitHub 通行證 (Token)</label>
+            <input type="password" id="ghToken" placeholder="請填寫以啟用雲端發布...">
         </div>
-
         <div style="display:flex; gap:10px; margin-top:30px">
             <button class="btn btn-ghost" style="flex:1" onclick="closeAdmin()">關閉</button>
-            <button class="btn btn-primary" style="flex:1" onclick="saveAdminSettings()">儲存並發布變更</button>
+            <button class="btn btn-primary" style="flex:1" onclick="saveAdminSettings()">儲存變更</button>
         </div>
     </div>
 </div>
@@ -129,8 +116,11 @@
         <h2 id="mTitle" style="margin-bottom:20px">編輯 SOP 內容</h2>
         <div class="field"><label>所屬類別</label><select id="fTag"></select></div>
         <div class="field"><label>問題標題</label><input type="text" id="fQ"></div>
+        
         <div id="conversationsContainer"></div>
-        <button class="btn btn-ghost" style="width:100%; margin:10px 0 20px; border:1px dashed #DDD" onclick="addConvField()">＋ 新增一組話術與步驟</button>
+        
+        <button class="btn btn-ghost" style="width:100%; margin:10px 0 20px; border:1px dashed #DDD" onclick="addConvField()">＋ 新增一組情境對應</button>
+        
         <div style="display:flex; gap:10px">
             <button class="btn btn-ghost" style="flex:1" onclick="closeQA()">取消</button>
             <button class="btn btn-primary" style="flex:1" id="saveBtn" onclick="submitToCloud()">更新至雲端倉庫</button>
@@ -140,8 +130,8 @@
 
 <script>
 // --- 資料儲存區 (自動更新) ---
-let categories = [{"id":"gate","name":"柵門問題","order":1},{"id":"fee","name":"繳費問題","order":2},{"id":"ticket","name":"發票載具","order":3},{"id":"cat_1778570066208","name":"月租","order":4}];
-let qaData = [{"id":1778570345595,"tag":"gate","q":"臨停-客人已經到柵欄了，但被卡住","convs":[{"intro":"您好，請問您車牌多少?已經繳費了嗎?","steps":"如果已經繳費，請協助開門\n"},{"intro":"","steps":"沒繳費，協助開門出柵欄後，請客人停至出口旁空地繳費"}]}];
+let categories = [{id:"gate",name:"柵門問題",order:1},{id:"fee",name:"繳費問題",order:2},{id:"ticket",name:"發票載具",order:3}];
+let qaData = [];
 
 // --- 邏輯處理 ---
 let editingId = null;
@@ -158,15 +148,13 @@ function renderCatManager() {
     const container = document.getElementById('categoryManagerList');
     container.innerHTML = categories.sort((a,b)=>a.order-b.order).map((c, i) => `
         <div style="display:flex; gap:8px; margin-bottom:8px">
-            <input type="text" value="${c.name}" onchange="updateCat(${i}, 'name', this.value)" style="flex:3; padding:6px 10px; border-radius:6px; border:1px solid #DDD; font-size:14px">
-            <input type="number" value="${c.order}" onchange="updateCat(${i}, 'order', this.value)" style="flex:1; padding:6px; border-radius:6px; border:1px solid #DDD; text-align:center">
-            <button class="btn-danger" onclick="removeCategory(${i})">✕</button>
+            <input type="text" value="${c.name}" onchange="categories[${i}].name=this.value" style="flex:3; padding:6px 10px; border-radius:6px; border:1px solid #DDD">
+            <input type="number" value="${c.order}" onchange="categories[${i}].order=parseInt(this.value)" style="flex:1; padding:6px; border-radius:6px; border:1px solid #DDD; text-align:center">
+            <button class="btn-danger-small" onclick="if(confirm('確定刪除類別？')){categories.splice(${i},1);renderCatManager()}">✕</button>
         </div>
     `).join('');
 }
-function updateCat(i, key, val) { categories[i][key] = key === 'order' ? parseInt(val) : val; }
 function addNewCategory() { categories.push({id:"cat_"+Date.now(), name:"新類別", order:categories.length+1}); renderCatManager(); }
-function removeCategory(i) { if(confirm("確定刪除類別？")) { categories.splice(i, 1); renderCatManager(); } }
 
 function saveAdminSettings() {
     localStorage.setItem('gh_token', document.getElementById('ghToken').value);
@@ -206,16 +194,57 @@ function render() {
 }
 function setFilter(t) { currentFilter = t; render(); }
 
-function addConvField(intro = '', steps = '') {
+// --- 編輯功能專用 ---
+
+// 產生一個單獨的步驟輸入框
+function createStepInput(val = '') {
+    const div = document.createElement('div');
+    div.className = 'step-input-group';
+    div.innerHTML = `
+        <span class="step-number-label"></span>
+        <input type="text" class="step-input" value="${val}" placeholder="輸入步驟內容...">
+        <button class="btn-danger-small" onclick="const p=this.parentElement.parentElement; this.parentElement.remove(); renumberSteps(p)">✕</button>
+    `;
+    return div;
+}
+
+// 重新編號
+function renumberSteps(container) {
+    container.querySelectorAll('.step-number-label').forEach((label, i) => {
+        label.textContent = (i + 1) + '.';
+    });
+}
+
+// 新增一個情境大區塊
+function addConvField(intro = '', stepsStr = '') {
     const container = document.getElementById('conversationsContainer');
     const div = document.createElement('div');
     div.className = 'edit-conv-item';
+    
+    // 話術標題區
     div.innerHTML = `
-        <button onclick="this.parentElement.remove()" style="position:absolute; right:10px; top:10px; border:none; background:none; cursor:pointer; color:#AAA">✕</button>
-        <div class="field" style="margin-bottom:10px"><label style="font-size:12px">對話話術</label><input type="text" class="edit-intro" value="${intro}"></div>
-        <div class="field" style="margin:0"><label style="font-size:12px">處理步驟</label><textarea class="edit-steps" style="height:60px">${steps}</textarea></div>
+        <button onclick="this.parentElement.remove()" style="position:absolute; right:10px; top:10px; border:none; background:none; cursor:pointer; color:#AAA">✕ 刪除整組</button>
+        <div class="field" style="margin-bottom:15px">
+            <label style="color:var(--accent)">💬 對話話術</label>
+            <input type="text" class="edit-intro" value="${intro}" placeholder="例如：您好，請問您的車牌是...">
+        </div>
+        <label style="font-size:14px; font-weight:700; margin-bottom:8px; display:block">🛠️ 處理步驟</label>
+        <div class="steps-list-container"></div>
+        <button class="btn-add-step" onclick="this.previousElementSibling.appendChild(createStepInput()); renumberSteps(this.previousElementSibling)">＋ 新增步驟</button>
     `;
+    
     container.appendChild(div);
+    
+    // 填充既有的步驟
+    const stepsList = div.querySelector('.steps-list-container');
+    if (stepsStr) {
+        stepsStr.split('\n').filter(s => s.trim()).forEach(s => {
+            stepsList.appendChild(createStepInput(s));
+        });
+    } else {
+        stepsList.appendChild(createStepInput()); // 預設給一個空步驟
+    }
+    renumberSteps(stepsList);
 }
 
 function editSOP(id) {
@@ -229,6 +258,7 @@ function editSOP(id) {
     document.getElementById('qaModal').classList.add('open');
     closeAdmin();
 }
+
 function openQA() {
     editingId = null;
     document.getElementById('fQ').value = '';
@@ -245,17 +275,23 @@ async function submitToCloud(isAdminSave = false) {
     if(!token) return alert("請先在開發者設置中填寫 GitHub 通行證");
 
     if(!isAdminSave) {
-        const convs = Array.from(document.querySelectorAll('.edit-conv-item')).map(item => ({
-            intro: item.querySelector('.edit-intro').value,
-            steps: item.querySelector('.edit-steps').value
-        }));
+        // 抓取所有編輯中的情境
+        const convs = Array.from(document.querySelectorAll('.edit-conv-item')).map(item => {
+            // 抓取該組內所有的步驟輸入框並用換行合併
+            const stepInputs = Array.from(item.querySelectorAll('.step-input')).map(i => i.value.trim()).filter(v => v);
+            return {
+                intro: item.querySelector('.edit-intro').value,
+                steps: stepInputs.join('\n')
+            };
+        });
+        
         const newItem = { id: editingId || Date.now(), tag: document.getElementById('fTag').value, q: document.getElementById('fQ').value, convs };
         if(editingId) qaData[qaData.findIndex(d=>d.id===editingId)] = newItem;
         else qaData.push(newItem);
     }
 
     const btn = document.getElementById('saveBtn');
-    if(btn) { btn.disabled = true; btn.textContent = "連線中..."; }
+    if(btn) { btn.disabled = true; btn.textContent = "發布中..."; }
 
     try {
         const url = `https://api.github.com/repos/topallpark/parking-qa/contents/index.html`;
@@ -271,12 +307,12 @@ async function submitToCloud(isAdminSave = false) {
         await fetch(url, {
             method: 'PUT',
             headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Update Data', content: btoa(unescape(encodeURIComponent(newFull))), sha: fileData.sha })
+            body: JSON.stringify({ message: 'Update SOP Steps UI', content: btoa(unescape(encodeURIComponent(newFull))), sha: fileData.sha })
         });
-        alert("✅ 同步成功！網頁稍後將自動更新。");
+        alert("✅ 同步發布成功！網頁即將更新。");
         document.querySelectorAll('.modal-bg').forEach(m => m.classList.remove('open'));
         render();
-    } catch (e) { alert("同步失敗，請檢查 Token 是否正確。"); }
+    } catch (e) { alert("同步失敗，請檢查網路或 Token。"); }
     finally { if(btn) { btn.disabled = false; btn.textContent = "更新至雲端倉庫"; } }
 }
 
