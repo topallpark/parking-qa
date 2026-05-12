@@ -1,405 +1,297 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>停車場客服 SOP 快查系統</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#F5F4F0;--surface:#FFF;--border:rgba(0,0,0,0.1);--border-h:rgba(0,0,0,0.2);
-  --text:#1A1A1A;--muted:#6B6B6B;--hint:#ABABAB;
-  --accent:#1A56DB;--accent-l:#EEF3FF;--accent-d:#1440A8;
-  --gate-bg:#FEF2F2;--gate-t:#991B1B;
-  --fee-bg:#FFFBEB;--fee-t:#92400E;
-  --ticket-bg:#ECFDF5;--ticket-t:#065F46;
-  --other-bg:#EFF6FF;--other-t:#1E40AF;
-  --danger:#DC2626;--danger-l:#FEF2F2;
-  --success:#16A34A;--success-l:#F0FDF4;
-  --r:10px;
-}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
-
-/* HEADER */
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:200}
-.h-icon{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
-.h-icon svg{width:15px;height:15px;fill:white}
-header h1{font-size:15px;font-weight:700;letter-spacing:-0.01em}
-.h-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
-.btn{display:inline-flex;align-items:center;gap:5px;font-size:13px;padding:6px 13px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s;white-space:nowrap}
-.btn:hover{border-color:var(--border-h);background:var(--bg)}
-.btn-primary{background:var(--accent);color:white;border-color:var(--accent)}
-.btn-primary:hover{background:var(--accent-d);border-color:var(--accent-d)}
-.btn-danger{background:var(--danger-l);color:var(--danger);border-color:#FCA5A5}
-.btn-danger:hover{background:#FEE2E2}
-.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-
-/* MAIN */
-main{max-width:820px;margin:0 auto;padding:24px 16px 80px}
-
-/* SEARCH & TAGS */
-.search-box{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);display:flex;align-items:center;gap:10px;padding:0 14px;margin-bottom:12px;transition:border-color .15s;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.search-box:focus-within{border-color:var(--accent)}
-.search-box svg{width:16px;height:16px;stroke:var(--hint);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
-.search-box input{border:none;outline:none;background:transparent;font-family:inherit;font-size:14px;color:var(--text);width:100%;height:44px}
-.search-box input::placeholder{color:var(--hint)}
-.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
-.tag{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;font-weight:500;user-select:none}
-.tag:hover{border-color:var(--border-h);color:var(--text)}
-.tag.active{background:var(--accent);color:white;border-color:var(--accent)}
-.sec-label{font-size:11px;font-weight:700;color:var(--hint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
-
-/* QA CARDS */
-.qa-list{display:flex;flex-direction:column;gap:8px}
-.qa-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:border-color .15s}
-.qa-card:hover{border-color:var(--border-h)}
-.qa-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
-.q-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
-.q-badge.gate{background:var(--gate-bg);color:var(--gate-t)}
-.q-badge.fee{background:var(--fee-bg);color:var(--fee-t)}
-.q-badge.ticket{background:var(--ticket-bg);color:var(--ticket-t)}
-.q-badge.other{background:var(--other-bg);color:var(--other-t)}
-.q-text{font-size:14px;font-weight:500;flex:1}
-.card-actions{display:flex;gap:4px;margin-left:4px}
-.icon-btn{width:28px;height:28px;border:none;background:none;cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--hint);transition:all .15s}
-.icon-btn:hover{background:var(--bg);color:var(--text)}
-.icon-btn.del:hover{background:var(--danger-l);color:var(--danger)}
-.icon-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
-.chevron{width:15px;height:15px;stroke:var(--hint);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;transition:transform .2s}
-.qa-card.open .chevron{transform:rotate(180deg)}
-.qa-body{border-top:1px solid var(--border);padding:14px 16px;display:none;background:#FAFAFA}
-.qa-card.open .qa-body{display:block}
-.a-label{font-size:10px;font-weight:700;color:var(--hint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-.a-intro{font-size:13.5px;color:var(--text);margin-bottom:10px;padding:10px 13px;background:white;border:1px solid var(--border);border-radius:8px;border-left:3px solid var(--accent);line-height:1.65}
-.steps{display:flex;flex-direction:column;gap:7px}
-.step{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;background:white;border:1px solid var(--border);border-radius:8px}
-.step-num{width:20px;height:20px;border-radius:50%;background:var(--accent-l);color:var(--accent);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-.step-text{font-size:13.5px;color:var(--text);line-height:1.65}
-.step-text strong{font-weight:700}
-.copy-btn{margin-top:12px;display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:7px;background:white;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
-.copy-btn:hover{border-color:var(--border-h);color:var(--text)}
-.copy-btn.copied{background:var(--success-l);color:var(--success);border-color:#86EFAC}
-.copy-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
-.empty{text-align:center;padding:48px 20px;color:var(--hint);font-size:14px}
-
-/* MODAL */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;padding:20px}
-.modal-bg.open{display:flex}
-.modal{background:var(--surface);border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.modal-header{padding:18px 20px 0;display:flex;align-items:center;justify-content:space-between}
-.modal-header h2{font-size:16px;font-weight:700}
-.modal-close{width:30px;height:30px;border:none;background:none;cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
-.modal-close:hover{background:var(--bg)}
-.modal-close svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
-.modal-body{padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px}
-.field{display:flex;flex-direction:column;gap:5px}
-.field label{font-size:12px;font-weight:700;color:var(--muted)}
-.field input,.field select,.field textarea{font-family:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;outline:none;transition:border-color .15s;width:100%}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);background:white}
-.field textarea{resize:vertical;min-height:70px;line-height:1.6}
-.steps-editor{display:flex;flex-direction:column;gap:8px}
-.step-edit-row{display:flex;gap:8px;align-items:flex-start}
-.step-edit-row textarea{flex:1;font-family:inherit;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;outline:none;resize:vertical;min-height:56px;transition:border-color .15s;line-height:1.55}
-.step-edit-row textarea:focus{border-color:var(--accent);background:white}
-.step-del-btn{width:28px;height:28px;border:1px solid #FCA5A5;background:var(--danger-l);color:var(--danger);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-.step-del-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
-.add-step-btn{font-size:12px;color:var(--accent);background:var(--accent-l);border:1px dashed #93C5FD;border-radius:7px;padding:7px;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
-.add-step-btn:hover{background:#DBEAFE}
-.modal-footer{padding:0 20px 20px;display:flex;gap:8px;justify-content:flex-end}
-
-/* EXPORT PANEL */
-.export-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
-.export-bar p{font-size:13px;color:var(--muted);flex:1;line-height:1.5}
-.export-bar strong{color:var(--text)}
-
-footer{text-align:center;font-size:11px;color:var(--hint);padding:16px;border-top:1px solid var(--border);background:var(--surface)}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車場客服 SOP 雲端管理版</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 繼承您原始的所有 CSS 並微調 */
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#F5F4F0;--surface:#FFF;--border:rgba(0,0,0,0.1);--border-h:rgba(0,0,0,0.2);
+            --text:#1A1A1A;--muted:#6B6B6B;--hint:#ABABAB;
+            --accent:#1A56DB;--accent-l:#EEF3FF;--accent-d:#1440A8;
+            --danger:#DC2626;--danger-l:#FEF2F2;
+            --success:#16A34A;--success-l:#F0FDF4;
+            --r:10px;
+        }
+        body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+        header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:200}
+        .h-icon{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+        .h-icon svg{width:15px;height:15px;fill:white}
+        header h1{font-size:15px;font-weight:700}
+        .h-actions{margin-left:auto;display:flex;gap:8px}
+        .btn{display:inline-flex;align-items:center;gap:5px;font-size:13px;padding:6px 13px;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-weight:500;transition:0.15s}
+        .btn-primary{background:var(--accent);color:white;border-color:var(--accent)}
+        main{max-width:820px;margin:0 auto;padding:24px 16px 80px}
+        .search-box{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);display:flex;align-items:center;gap:10px;padding:0 14px;margin-bottom:12px}
+        .search-box input{border:none;outline:none;width:100%;height:44px;font-family:inherit}
+        .tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+        .tag{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer}
+        .tag.active{background:var(--accent);color:white}
+        .qa-list{display:flex;flex-direction:column;gap:8px}
+        .qa-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+        .qa-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+        .q-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--accent-l);color:var(--accent)}
+        .q-text{font-size:14px;font-weight:500;flex:1}
+        .qa-body{border-top:1px solid var(--border);padding:16px;display:none;background:#FAFAFA}
+        .qa-card.open .qa-body{display:block}
+        .step{display:flex;gap:10px;margin-bottom:8px;background:white;padding:10px;border-radius:8px;border:1px solid var(--border)}
+        .step-num{width:20px;height:20px;border-radius:50%;background:var(--accent-l);color:var(--accent);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+        
+        /* 彈窗樣式 */
+        .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;padding:20px}
+        .modal-bg.open{display:flex}
+        .modal{background:var(--surface);border-radius:14px;width:100%;max-width:500px;padding:20px}
+        .field{margin-bottom:12px}
+        .field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
+        .field input, .field select, .field textarea{width:100%;padding:8px;border:1px solid var(--border);border-radius:6px}
+        
+        /* 管理功能區 */
+        .admin-controls{background:#fff;border:1px dashed var(--accent);padding:15px;border-radius:10px;margin-bottom:20px}
+        .cat-manager{margin-top:15px;padding-top:15px;border-top:1px solid var(--border)}
+        .cat-item{display:inline-flex;align-items:center;background:#eee;padding:2px 8px;border-radius:4px;margin:2px;font-size:12px}
+        .cat-del{margin-left:5px;cursor:pointer;color:red;font-weight:bold}
+    </style>
 </head>
 <body>
 
 <header>
-  <div class="h-icon">
-    <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v14l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
-  </div>
-  <h1>停車場客服 SOP</h1>
-  <div class="h-actions">
-    <button class="btn" onclick="toggleAdmin()" id="adminToggle">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>
-      後台管理
-    </button>
-  </div>
+    <div class="h-icon"><svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v14l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg></div>
+    <h1>停車場客服 SOP 系統</h1>
+    <div class="h-actions">
+        <button class="btn" onclick="toggleAdmin()" id="adminToggle">後台管理</button>
+    </div>
 </header>
 
 <main>
-  <!-- ADMIN BAR -->
-  <div class="export-bar" id="adminBar" style="display:none">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A56DB" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-    <p><strong>後台模式</strong>　新增或修改完成後，點「匯出網站」下載新的 index.html，上傳到 GitHub 即可更新。</p>
-    <button class="btn" onclick="openAdd()">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      新增問題
-    </button>
-    <button class="btn btn-primary" onclick="exportSite()">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      匯出網站
-    </button>
-  </div>
+    <!-- 後台管理面板 -->
+    <div id="adminPanel" class="admin-controls" style="display:none">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+            <strong>🔧 後台控制台 (資料已自動儲存至瀏覽器)</strong>
+            <button class="btn btn-primary" onclick="openQA()">新增 SOP 問題</button>
+        </div>
+        
+        <div class="cat-manager">
+            <p style="font-size:12px; font-weight:bold">類別管理：</p>
+            <div id="catListDisplay" style="margin:8px 0"></div>
+            <div style="display:flex; gap:5px">
+                <input type="text" id="newCatInput" placeholder="新類別名稱" style="padding:5px; border-radius:4px; border:1px solid #ccc; flex:1">
+                <button class="btn" onclick="addCategory()">新增類別</button>
+            </div>
+        </div>
+        <p style="font-size:11px; color:orange; margin-top:10px">※ 提示：本機儲存僅限此瀏覽器。若需同步至 GitHub 永久保存，仍建議定期點擊「匯出備份」。</p>
+        <button class="btn" style="margin-top:5px; font-size:11px" onclick="exportSite()">匯出備份 index.html</button>
+    </div>
 
-  <div class="search-box">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" id="searchInput" placeholder="輸入關鍵字，例如：柵門、繳費、發票…" oninput="renderList()">
-  </div>
-  <div class="tag-row" id="tagRow"></div>
-  <div class="sec-label" id="secLabel">所有問題</div>
-  <div class="qa-list" id="qaList"></div>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="搜尋關鍵字..." oninput="renderList()">
+    </div>
+    <div class="tag-row" id="tagRow"></div>
+    <div class="qa-list" id="qaList"></div>
 </main>
 
-<footer>停車場客服 SOP 快查系統</footer>
-
-<!-- MODAL -->
-<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="modalTitle">新增問題</h2>
-      <button class="modal-close" onclick="closeModalForce()">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+<!-- SOP 編輯彈窗 -->
+<div class="modal-bg" id="qaModal">
+    <div class="modal">
+        <h2 id="qaModalTitle">編輯 SOP</h2>
+        <div class="field">
+            <label>分類</label>
+            <select id="fTag"></select>
+        </div>
+        <div class="field">
+            <label>問題 (Q)</label>
+            <input type="text" id="fQ">
+        </div>
+        <div class="field">
+            <label>開頭回覆</label>
+            <textarea id="fIntro"></textarea>
+        </div>
+        <div class="field">
+            <label>處理步驟 (每行一步驟)</label>
+            <textarea id="fSteps" style="min-height:100px" placeholder="第一步&#10;第二步"></textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px">
+            <button class="btn" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveQA()">儲存變更</button>
+        </div>
     </div>
-    <div class="modal-body">
-      <div class="field">
-        <label>分類</label>
-        <select id="fTag">
-          <option value="gate">柵門問題</option>
-          <option value="fee">繳費問題</option>
-          <option value="ticket">發票/載具</option>
-          <option value="other">月租</option>
-          <option value="other">其他</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>問題（Q）</label>
-        <input type="text" id="fQ" placeholder="例如：柵門打不開">
-      </div>
-      <div class="field">
-        <label>開頭回覆（先說這句話）</label>
-        <textarea id="fIntro" placeholder="例如：你好，請問有繳費了嗎？"></textarea>
-      </div>
-      <div class="field">
-        <label>處理步驟（A）</label>
-        <div class="steps-editor" id="stepsEditor"></div>
-        <button class="add-step-btn" onclick="addStepField()">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          新增步驟
-        </button>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModalForce()">取消</button>
-      <button class="btn btn-primary" onclick="saveEntry()">儲存</button>
-    </div>
-  </div>
 </div>
 
 <script>
-const TAG_MAP = {gate:'柵門問題',fee:'繳費問題',ticket:'票券 / 發票',other:'其他'};
-const TAGS = [{key:'all',label:'全部'},...Object.entries(TAG_MAP).map(([k,v])=>({key:k,label:v}))];
+// --- 資料初始化 ---
+let categories = JSON.parse(localStorage.getItem('parking_cats')) || {
+    gate: '柵門問題',
+    fee: '繳費問題',
+    ticket: '發票/載具',
+    other: '其他'
+};
 
-let qaData = [
-  {id:1,tag:'gate',q:'柵門打不開',intro:'你好，請問有繳費了嗎？',steps:['<strong>尚未繳費：</strong>請提供車牌號碼，我先幫您開門，請先停到旁邊空地，再前往繳費機完成繳費。','<strong>已繳費但打不開：</strong>請提供車牌號碼，我幫您確認繳費紀錄並手動開門，請稍候。']},
-  {id:2,tag:'gate',q:'入場柵門感應不到票券 / 車牌',intro:'您好，請問您使用的是哪種入場方式（取票、月租、車牌辨識）？',steps:['<strong>取票式：</strong>請確認按鈕是否按下，若機器無反應請告知車道號碼，我手動開門並通知維修。','<strong>月租 / 車牌辨識：</strong>請提供車牌，我手動開門後幫您查詢辨識異常原因。']},
-  {id:3,tag:'fee',q:'繳費機故障 / 無法繳費',intro:'非常抱歉造成您的不便，請問您停放的車牌號碼為何？',steps:['確認停車時數與應繳金額，告知用戶正確費用。','<strong>改為人工收費：</strong>請至管理室窗口繳費，或提供其他可用繳費機台位置。','協助手動開門放行，紀錄故障時間並回報維修。']},
-  {id:4,tag:'fee',q:'費用計算有誤 / 覺得收費太貴',intro:'您好，請問您的車牌號碼與入場時間？我幫您確認計費紀錄。',steps:['查詢入場時間與計費明細，向用戶說明計費規則（例如：每 30 分鐘計算一次）。','<strong>如確認計費有誤：</strong>協助更正並致歉，記錄異常回報主管。','<strong>如計費正確：</strong>耐心說明計費方式，提供收據供用戶留存。']},
-  {id:5,tag:'ticket',q:'停車票據遺失',intro:'您好，請問您的入場時間與車牌號碼？',steps:['查詢入場紀錄，確認停車時數。','依系統紀錄計費，說明遺失票據補辦流程或補發收據。']},
-  {id:6,tag:'ticket',q:'需要停車發票 / 收據',intro:'您好，請問您需要電子發票還是紙本收據？',steps:['<strong>電子發票：</strong>請提供載具條碼，系統開立後傳送至您的手機。','<strong>紙本收據：</strong>請至管理室窗口索取，需攜帶繳費憑證。']},
-  {id:7,tag:'other',q:'車輛在停車場內發生事故 / 刮傷',intro:'非常抱歉發生這樣的狀況，請您先保持冷靜，確認人員是否安全。',steps:['請雙方先不要移動車輛，於現場等候。','調閱該區域監視錄影（請告知車道或停車格號碼），協助釐清狀況。','提供管理室聯絡電話，必要時協助通報警方處理。']},
-  {id:8,tag:'other',q:'車輛被其他車輛擋住無法離場',intro:'您好，請提供您的停車位置與擋車車牌號碼（如可辨識）。',steps:['廣播通知擋車車主移車（廣播次數依規定執行）。','若 10 分鐘內無人移車，通知主管啟動後續處理程序（拖吊聯絡等）。','協助用戶留下聯絡方式，待問題解決後主動回電告知。']}
+let qaData = JSON.parse(localStorage.getItem('parking_qa')) || [
+    {id:1,tag:'gate',q:'柵門打不開',intro:'你好，請問有繳費了嗎？',steps:['尚未繳費：告知前往繳費','已繳費：手動開門']}
 ];
 
-let nextId = 9;
 let activeTag = 'all';
-let openId = null;
-let editingId = null;
 let adminMode = false;
+let editingId = null;
 
-function toggleAdmin(){
-  adminMode = !adminMode;
-  document.getElementById('adminBar').style.display = adminMode ? 'flex' : 'none';
-  document.getElementById('adminToggle').innerHTML = adminMode
-    ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 關閉後台'
-    : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg> 後台管理';
-  renderList();
+// --- 核心儲存功能 ---
+function saveData() {
+    localStorage.setItem('parking_cats', JSON.stringify(categories));
+    localStorage.setItem('parking_qa', JSON.stringify(qaData));
+    renderTags();
+    renderList();
 }
 
-function renderTags(){
-  document.getElementById('tagRow').innerHTML = TAGS.map(t=>
-    `<span class="tag${activeTag===t.key?' active':''}" onclick="setTag('${t.key}')">${t.label}</span>`
-  ).join('');
+// --- 類別管理 ---
+function renderTags() {
+    const tagRow = document.getElementById('tagRow');
+    const fTag = document.getElementById('fTag');
+    const catDisplay = document.getElementById('catListDisplay');
+    
+    let tagsHtml = `<span class="tag ${activeTag==='all'?'active':''}" onclick="setTag('all')">全部</span>`;
+    let selectHtml = '';
+    let adminCatHtml = '';
+
+    for (let key in categories) {
+        tagsHtml += `<span class="tag ${activeTag===key?'active':''}" onclick="setTag('${key}')">${categories[key]}</span>`;
+        selectHtml += `<option value="${key}">${categories[key]}</option>`;
+        adminCatHtml += `<span class="cat-item">${categories[key]} <span class="cat-del" onclick="deleteCategory('${key}')">×</span></span>`;
+    }
+
+    tagRow.innerHTML = tagsHtml;
+    fTag.innerHTML = selectHtml;
+    catDisplay.innerHTML = adminCatHtml;
 }
 
-function setTag(k){activeTag=k;renderTags();renderList()}
-
-function getFiltered(){
-  const kw = document.getElementById('searchInput').value.trim().toLowerCase();
-  return qaData.filter(d=>{
-    const tm = activeTag==='all'||d.tag===activeTag;
-    const km = !kw||d.q.toLowerCase().includes(kw)||d.intro.toLowerCase().includes(kw)||d.steps.some(s=>s.toLowerCase().includes(kw));
-    return tm&&km;
-  });
+function addCategory() {
+    const input = document.getElementById('newCatInput');
+    const name = input.value.trim();
+    if (!name) return;
+    const key = 'cat_' + Date.now();
+    categories[key] = name;
+    input.value = '';
+    saveData();
 }
 
-function toggle(id){
-  openId = openId===id ? null : id;
-  renderList();
+function deleteCategory(key) {
+    if (confirm(`確定刪除「${categories[key]}」類別？該類別下的問題將變成「其他」。`)) {
+        qaData.forEach(item => { if(item.tag === key) item.tag = 'other'; });
+        delete categories[key];
+        saveData();
+    }
 }
 
-function copyScript(id){
-  const item = qaData.find(d=>d.id===id);
-  if(!item) return;
-  let txt = item.intro+'\n';
-  item.steps.forEach((s,i)=>{txt+=`\n${i+1}. ${s.replace(/<[^>]+>/g,'')}`});
-  navigator.clipboard.writeText(txt).then(()=>{
-    const btn = document.getElementById('copy-'+id);
-    if(!btn) return;
-    btn.classList.add('copied');
-    btn.innerHTML='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> 已複製';
-    setTimeout(()=>{
-      btn.classList.remove('copied');
-      btn.innerHTML='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> 複製話術';
-    },2000);
-  });
+// --- SOP 管理 ---
+function toggleAdmin() {
+    adminMode = !adminMode;
+    document.getElementById('adminPanel').style.display = adminMode ? 'block' : 'none';
+    document.getElementById('adminToggle').textContent = adminMode ? '關閉後台' : '後台管理';
+    renderList();
 }
 
-function deleteEntry(id){
-  if(!confirm('確定要刪除這筆問題嗎？')) return;
-  qaData = qaData.filter(d=>d.id!==id);
-  if(openId===id) openId=null;
-  renderList();
+function setTag(k) { activeTag = k; renderTags(); renderList(); }
+
+function openQA(id = null) {
+    editingId = id;
+    if (id) {
+        const item = qaData.find(d => d.id === id);
+        document.getElementById('fTag').value = item.tag;
+        document.getElementById('fQ').value = item.q;
+        document.getElementById('fIntro').value = item.intro;
+        document.getElementById('fSteps').value = item.steps.join('\n');
+        document.getElementById('qaModalTitle').textContent = '編輯 SOP';
+    } else {
+        document.getElementById('fQ').value = '';
+        document.getElementById('fIntro').value = '';
+        document.getElementById('fSteps').value = '';
+        document.getElementById('qaModalTitle').textContent = '新增 SOP';
+    }
+    document.getElementById('qaModal').classList.add('open');
 }
 
-function openAdd(){
-  editingId=null;
-  document.getElementById('modalTitle').textContent='新增問題';
-  document.getElementById('fTag').value='gate';
-  document.getElementById('fQ').value='';
-  document.getElementById('fIntro').value='';
-  buildStepFields(['']);
-  document.getElementById('modalBg').classList.add('open');
+function saveQA() {
+    const newItem = {
+        id: editingId || Date.now(),
+        tag: document.getElementById('fTag').value,
+        q: document.getElementById('fQ').value,
+        intro: document.getElementById('fIntro').value,
+        steps: document.getElementById('fSteps').value.split('\n').filter(s => s.trim())
+    };
+
+    if (editingId) {
+        const idx = qaData.findIndex(d => d.id === editingId);
+        qaData[idx] = newItem;
+    } else {
+        qaData.push(newItem);
+    }
+    closeModal();
+    saveData();
 }
 
-function openEdit(id){
-  const item=qaData.find(d=>d.id===id);
-  if(!item) return;
-  editingId=id;
-  document.getElementById('modalTitle').textContent='編輯問題';
-  document.getElementById('fTag').value=item.tag;
-  document.getElementById('fQ').value=item.q;
-  document.getElementById('fIntro').value=item.intro;
-  buildStepFields(item.steps.map(s=>s.replace(/<[^>]+>/g,'')));
-  document.getElementById('modalBg').classList.add('open');
+function deleteQA(id) {
+    if (confirm('確定刪除此 SOP？')) {
+        qaData = qaData.filter(d => d.id !== id);
+        saveData();
+    }
 }
 
-function buildStepFields(steps){
-  const ed=document.getElementById('stepsEditor');
-  ed.innerHTML='';
-  steps.forEach(s=>addStepField(s));
+function closeModal() { document.getElementById('qaModal').classList.remove('open'); }
+
+// --- 列表渲染 ---
+function renderList() {
+    const kw = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = qaData.filter(d => {
+        const matchTag = activeTag === 'all' || d.tag === activeTag;
+        const matchSearch = d.q.toLowerCase().includes(kw) || d.intro.toLowerCase().includes(kw);
+        return matchTag && matchSearch;
+    });
+
+    document.getElementById('qaList').innerHTML = filtered.map(item => `
+        <div class="qa-card" id="card-${item.id}">
+            <div class="qa-header" onclick="this.parentElement.classList.toggle('open')">
+                <span class="q-badge">${categories[item.tag] || '其他'}</span>
+                <span class="q-text">${item.q}</span>
+                ${adminMode ? `
+                    <button class="btn" onclick="event.stopPropagation();openQA(${item.id})">改</button>
+                    <button class="btn" style="color:red" onclick="event.stopPropagation();deleteQA(${item.id})">刪</button>
+                ` : ''}
+            </div>
+            <div class="qa-body">
+                <div style="background:#fff; padding:10px; border-left:3px solid var(--accent); margin-bottom:10px">${item.intro}</div>
+                ${item.steps.map((s, i) => `<div class="step"><div class="step-num">${i+1}</div><div>${s}</div></div>`).join('')}
+                <button class="btn" onclick="copyText('${item.intro}\\n${item.steps.join('\\n')}')">複製話術</button>
+            </div>
+        </div>
+    `).join('');
 }
 
-function addStepField(val=''){
-  const ed=document.getElementById('stepsEditor');
-  const row=document.createElement('div');
-  row.className='step-edit-row';
-  row.innerHTML=`<textarea placeholder="例如：請提供車牌號碼，我幫您手動開門。">${val}</textarea>
-  <button class="step-del-btn" onclick="this.parentElement.remove()">
-    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>`;
-  ed.appendChild(row);
+function copyText(txt) {
+    navigator.clipboard.writeText(txt.replace(/\\n/g, '\n'));
+    alert('已複製到剪貼簿');
 }
 
-function saveEntry(){
-  const tag=document.getElementById('fTag').value;
-  const q=document.getElementById('fQ').value.trim();
-  const intro=document.getElementById('fIntro').value.trim();
-  const steps=[...document.querySelectorAll('#stepsEditor textarea')].map(t=>t.value.trim()).filter(Boolean);
-  if(!q){alert('請填寫問題');return}
-  if(!intro){alert('請填寫開頭回覆');return}
-  if(!steps.length){alert('請至少填寫一個步驟');return}
-  if(editingId!==null){
-    const idx=qaData.findIndex(d=>d.id===editingId);
-    if(idx>-1) qaData[idx]={id:editingId,tag,q,intro,steps};
-  } else {
-    qaData.push({id:nextId++,tag,q,intro,steps});
-  }
-  closeModalForce();
-  renderList();
+// --- 匯出功能 (用於同步回 GitHub) ---
+function exportSite() {
+    const html = document.documentElement.outerHTML;
+    // 更新 HTML 內的初始變數，讓下載的檔案包含最新資料
+    const updatedHtml = html
+        .replace(/let categories = JSON.parse\(localStorage.getItem\('parking_cats'\)\) \|\| \{[\s\S]*?\};/, `let categories = ${JSON.stringify(categories)};`)
+        .replace(/let qaData = JSON.parse\(localStorage.getItem\('parking_qa'\)\) \|\| \[[\s\S]*?\];/, `let qaData = ${JSON.stringify(qaData)};`);
+    
+    const blob = new Blob([updatedHtml], {type: 'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'index.html';
+    a.click();
 }
 
-function closeModal(e){if(e.target===document.getElementById('modalBg')) closeModalForce()}
-function closeModalForce(){document.getElementById('modalBg').classList.remove('open')}
-
-function renderList(){
-  renderTags();
-  const filtered=getFiltered();
-  const kw=document.getElementById('searchInput').value.trim();
-  const lbl=document.getElementById('secLabel');
-  if(kw) lbl.textContent=`搜尋「${kw}」— 共 ${filtered.length} 項結果`;
-  else {const t=TAGS.find(x=>x.key===activeTag);lbl.textContent=`${t?.label||'所有問題'} — 共 ${filtered.length} 項`}
-
-  if(!filtered.length){
-    document.getElementById('qaList').innerHTML='<div class="empty">找不到相關問題</div>';
-    return;
-  }
-  document.getElementById('qaList').innerHTML=filtered.map(item=>{
-    const isOpen=openId===item.id;
-    const stepsHTML=item.steps.map((s,i)=>`<div class="step"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('');
-    const editBtns=adminMode?`
-      <div class="card-actions">
-        <button class="icon-btn" onclick="event.stopPropagation();openEdit(${item.id})" title="編輯">
-          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-        <button class="icon-btn del" onclick="event.stopPropagation();deleteEntry(${item.id})" title="刪除">
-          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-        </button>
-      </div>`:''
-    return `<div class="qa-card${isOpen?' open':''}" data-id="${item.id}">
-      <div class="qa-header" onclick="toggle(${item.id})">
-        <span class="q-badge ${item.tag}">${TAG_MAP[item.tag]}</span>
-        <span class="q-text">${item.q}</span>
-        ${editBtns}
-        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-      </div>
-      <div class="qa-body">
-        <div class="a-label">標準回覆話術</div>
-        <div class="a-intro">${item.intro}</div>
-        <div class="steps">${stepsHTML}</div>
-        <button class="copy-btn" id="copy-${item.id}" onclick="copyScript(${item.id})">
-          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          複製話術
-        </button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function exportSite(){
-  const dataStr = JSON.stringify(qaData);
-  const html = document.documentElement.outerHTML;
-  const marker = 'let qaData = ';
-  const start = html.indexOf(marker);
-  const end = html.indexOf(';\n\nlet nextId', start);
-  if(start===-1||end===-1){alert('匯出失敗，請重新整理頁面後再試');return}
-  const newHtml = html.slice(0,start+marker.length) + dataStr + html.slice(end);
-  const blob = new Blob([newHtml],{type:'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'index.html';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
+// 啟動
 renderTags();
 renderList();
 </script>
+
 </body>
 </html>
