@@ -145,4 +145,155 @@ let currentFilter = 'all';
 // --- 管理模式功能 ---
 function openAdmin() {
     document.getElementById('adminModal').classList.add('open');
-    document.getElementById('ghToken').value = localStorage.getItem('gh_token') ||
+    document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
+    renderCatManager();
+}
+function closeAdmin() { document.getElementById('adminModal').classList.remove('open'); }
+
+function renderCatManager() {
+    const container = document.getElementById('categoryManagerList');
+    container.innerHTML = categories.sort((a,b)=>a.order-b.order).map((c, i) => `
+        <div style="display:flex; gap:10px; margin-bottom:8px; align-items:center">
+            <input type="text" value="${c.name}" onchange="updateCat(${i}, 'name', this.value)" style="flex:3; padding:8px; border-radius:6px; border:1px solid #DDD">
+            <input type="number" value="${c.order}" onchange="updateCat(${i}, 'order', this.value)" style="flex:1; padding:8px; border-radius:6px; border:1px solid #DDD" title="顯示順序">
+            <button class="btn-danger" onclick="removeCategory(${i})">✕</button>
+        </div>
+    `).join('');
+}
+function updateCat(i, key, val) { categories[i][key] = key === 'order' ? parseInt(val) : val; }
+function addNewCategory() {
+    const id = "cat_" + Date.now();
+    categories.push({id: id, name: "新類別", order: categories.length + 1});
+    renderCatManager();
+}
+function removeCategory(i) {
+    if(confirm("確定要刪除此類別嗎？(不會刪除該類別下的問題，但問題會變為未分類)")) {
+        categories.splice(i, 1);
+        renderCatManager();
+    }
+}
+
+function saveAdminSettings() {
+    localStorage.setItem('gh_token', document.getElementById('ghToken').value);
+    submitToCloud(true);
+}
+
+// --- 渲染前台 ---
+function render() {
+    const row = document.getElementById('tagRow');
+    const sortedCats = [...categories].sort((a,b)=>a.order-b.order);
+    row.innerHTML = `<span class="tag ${currentFilter==='all'?'active':''}" onclick="setFilter('all')">全部顯示</span>` +
+        sortedCats.map(c => `<span class="tag ${currentFilter===c.id?'active':''}" onclick="setFilter('${c.id}')">${c.name}</span>`).join('');
+
+    const kw = document.getElementById('searchInput').value.toLowerCase();
+    const list = document.getElementById('qaList');
+    const filtered = qaData.filter(d => (currentFilter==='all' || d.tag===currentFilter) && d.q.toLowerCase().includes(kw));
+
+    list.innerHTML = filtered.map(item => `
+        <div class="qa-card" onclick="this.classList.toggle('open')">
+            <div class="qa-header">
+                <span class="q-badge">${categories.find(c=>c.id===item.tag)?.name || '未分類'}</span>
+                <span class="q-text">${item.q}</span>
+                ${localStorage.getItem('gh_token') ? `<button class="btn btn-ghost" style="font-size:12px; padding:4px 8px" onclick="event.stopPropagation();editSOP(${item.id})">編輯</button>` : ''}
+            </div>
+            <div class="qa-body">
+                ${item.convs.map((c, i) => `
+                    <div class="conv-group">
+                        <span class="conv-label">對話與處理情境 ${i+1}</span>
+                        <div class="conv-intro">${c.intro}</div>
+                        ${c.steps.split('\n').filter(s=>s.trim()).map((s, si) => `
+                            <div class="conv-step"><div class="step-n">${si+si+1}</div>${s}</div>
+                        `).join('')}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+function setFilter(t) { currentFilter = t; render(); }
+
+// --- 編輯器邏輯 (無限組對應) ---
+function addConvField(intro = '', steps = '') {
+    const container = document.getElementById('conversationsContainer');
+    const div = document.createElement('div');
+    div.className = 'edit-conv-item';
+    div.innerHTML = `
+        <button onclick="this.parentElement.remove()" style="position:absolute; right:10px; top:10px; border:none; background:none; cursor:pointer; color:red">✕ 刪除</button>
+        <div class="field"><label>客服應對話術</label><input type="text" class="edit-intro" value="${intro}" placeholder="例如：您好，請問有先繳費嗎？"></div>
+        <div class="field"><label>處理操作步驟 (每行一步)</label><textarea class="edit-steps" style="height:80px" placeholder="請輸入步驟，換行即為下一集">${steps}</textarea></div>
+    `;
+    container.appendChild(div);
+}
+
+function editSOP(id) {
+    editingId = id;
+    const item = qaData.find(d => d.id === id);
+    document.getElementById('fTag').innerHTML = categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    document.getElementById('fTag').value = item.tag;
+    document.getElementById('fQ').value = item.q;
+    document.getElementById('conversationsContainer').innerHTML = '<label style="font-size:14px; font-weight:700">對話話術與處理步驟 (無限新增)</label>';
+    item.convs.forEach(c => addConvField(c.intro, c.steps));
+    document.getElementById('qaModal').classList.add('open');
+    closeAdmin();
+}
+
+function openQA() {
+    editingId = null;
+    document.getElementById('mTitle').textContent = "新增 SOP 內容";
+    document.getElementById('fQ').value = '';
+    document.getElementById('fTag').innerHTML = categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    document.getElementById('conversationsContainer').innerHTML = '<label style="font-size:14px; font-weight:700">對話話術與處理步驟 (無限新增)</label>';
+    addConvField();
+    document.getElementById('qaModal').classList.add('open');
+    closeAdmin();
+}
+function closeQA() { document.getElementById('qaModal').classList.remove('open'); openAdmin(); }
+
+// --- 雲端同步 ---
+async function submitToCloud(isAdminSave = false) {
+    const token = localStorage.getItem('gh_token');
+    const repo = 'topallpark/parking-qa';
+    if(!token) return alert("請輸入 Token 才能儲存至雲端！");
+
+    if(!isAdminSave) {
+        const convItems = document.querySelectorAll('.edit-conv-item');
+        const convs = Array.from(convItems).map(item => ({
+            intro: item.querySelector('.edit-intro').value,
+            steps: item.querySelector('.edit-steps').value
+        }));
+        const newItem = { id: editingId || Date.now(), tag: document.getElementById('fTag').value, q: document.getElementById('fQ').value, convs };
+        if(editingId) qaData[qaData.findIndex(d=>d.id===editingId)] = newItem;
+        else qaData.push(newItem);
+    }
+
+    const btn = isAdminSave ? null : document.getElementById('saveBtn');
+    if(btn) { btn.disabled = true; btn.textContent = "同步至 GitHub 中..."; }
+
+    try {
+        const url = `https://api.github.com/repos/${repo}/contents/index.html`;
+        const res = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+        const fileData = await res.json();
+        const oldContent = decodeURIComponent(escape(atob(fileData.content)));
+        
+        const dataMarker = "// --- 資料儲存區";
+        const endMarker = "// --- 初始狀態";
+        const newDataCode = `// --- 資料儲存區 (會被自動更新) ---\nlet categories = ${JSON.stringify(categories)};\nlet qaData = ${JSON.stringify(qaData)};\n\n`;
+        const newFull = oldContent.substring(0, oldContent.indexOf(dataMarker)) + newDataCode + oldContent.substring(oldContent.indexOf(endMarker));
+
+        await fetch(url, {
+            method: 'PUT',
+            headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'Update SOP Data', content: btoa(unescape(encodeURIComponent(newFull))), sha: fileData.sha })
+        });
+        alert("✅ 雲端同步成功！頁面將在 1 分鐘內完成更新。");
+        document.getElementById('qaModal').classList.remove('open');
+        closeAdmin(); 
+        render();
+    } catch (e) { alert("同步失敗！請檢查 Token 是否正確。"); }
+    finally { if(btn) { btn.disabled = false; btn.textContent = "更新至雲端"; } }
+}
+
+render();
+</script>
+</body>
+</html>
