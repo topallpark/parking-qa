@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>停車場客服 SOP 系統 - 專業版</title>
+    <title>全之駐停車場 - 客服 SOP 專業系統</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* 基礎樣式與變數 */
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         :root{ --bg:#F8F9FA; --surface:#FFF; --accent:#1A56DB; --text:#1F2937; --border:#E5E7EB; --r:12px; }
-        body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);padding-bottom:60px}
+        body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);padding-bottom:60px;min-height:100vh}
         
         /* 導航欄 */
         header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
@@ -36,14 +36,14 @@
         .qa-body{padding:0 24px 24px;display:none;background:#FAFBFF;border-top:1px solid var(--border);animation:fadeIn 0.3s}
         .qa-card.open .qa-body{display:block}
         
-        /* 無限對話組樣式 */
+        /* 對話組樣式 */
         .conv-group{background:white;border:1px solid var(--border);padding:15px;border-radius:8px;margin-top:15px}
         .conv-label{font-size:12px;font-weight:bold;color:var(--accent);margin-bottom:8px;display:block}
         .conv-intro{background:#F3F4F6;padding:10px;border-radius:6px;margin-bottom:10px;font-size:15px;border-left:4px solid var(--accent)}
         .conv-step{display:flex;gap:10px;font-size:14.5px;margin-bottom:5px}
         .step-n{width:20px;height:20px;background:var(--accent);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
 
-        /* 彈窗與編輯器 */
+        /* 彈窗樣式 */
         .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;z-index:200}
         .modal-bg.open{display:flex}
         .modal{background:white;padding:30px;border-radius:20px;width:95%;max-width:600px;max-height:85vh;overflow-y:auto}
@@ -51,11 +51,15 @@
         .field label{display:block;font-size:14px;font-weight:700;margin-bottom:8px}
         .field input, .field select, .field textarea{width:100%;padding:12px;border:1px solid #D1D5DB;border-radius:10px;font-size:15px;font-family:inherit}
         
-        /* 動態編輯對話組 */
-        .edit-conv-item{border:1px dashed #CCC;padding:15px;border-radius:10px;margin-bottom:15px;position:relative}
-        .btn{padding:10px 20px;border-radius:10px;cursor:pointer;font-weight:600;border:none;transition:0.2s}
+        /* 按鈕樣式 */
+        .btn{padding:10px 20px;border-radius:10px;cursor:pointer;font-weight:600;border:none;transition:0.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
         .btn-primary{background:var(--accent);color:white}
         .btn-ghost{background:#F3F4F6;color:#4B5563}
+        .btn-danger{background:#FEE2E2;color:#DC2626;font-size:12px;padding:4px 8px}
+
+        /* 編輯器內部樣式 */
+        .edit-conv-item{border:1px dashed #CCC;padding:15px;border-radius:10px;margin-bottom:15px;position:relative;background:#F9FAFB}
+        .admin-section{margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #EEE}
 
         @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
     </style>
@@ -65,16 +69,16 @@
 <header>
     <div class="logo" onclick="location.reload()">
         <div class="logo-box">P</div>
-        <strong style="font-size:20px">客服 SOP 快查</strong>
+        <strong style="font-size:20px">全之駐 SOP 系統</strong>
     </div>
-    <div id="adminControls">
-        <button class="btn btn-ghost" onclick="openAdmin()" id="adminEntryBtn">後台管理</button>
+    <div>
+        <button class="btn btn-ghost" onclick="openAdmin()">管理模式</button>
     </div>
 </header>
 
 <main>
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="搜尋問題、情境或關鍵字..." oninput="render()">
+        <input type="text" id="searchInput" placeholder="搜尋問題標題或關鍵字..." oninput="render()">
     </div>
     <div class="tag-row" id="tagRow"></div>
     <div id="qaList"></div>
@@ -82,20 +86,29 @@
 
 <div class="modal-bg" id="adminModal">
     <div class="modal">
-        <h2 style="margin-bottom:20px">⚙️ 系統管理員</h2>
+        <h2 style="margin-bottom:20px">⚙️ 後台管理系統</h2>
         
-        <div class="field">
-            <label>1. GitHub 通行證 (Token)</label>
-            <input type="password" id="ghToken" placeholder="若未設定過請填入...">
+        <div class="admin-section">
+            <div class="field">
+                <label>GitHub 通行證 (Token) - 已隱藏</label>
+                <input type="password" id="ghToken" placeholder="請貼入 Token...">
+            </div>
         </div>
-        
-        <div class="field">
-            <label>2. 類別排序管理</label>
+
+        <div class="admin-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
+                <label style="font-weight:700">類別排序管理</label>
+                <button class="btn btn-ghost" style="font-size:12px; padding:4px 10px" onclick="addNewCategory()">+ 新增類別</button>
+            </div>
             <div id="categoryManagerList" style="background:#F9FAFB; padding:15px; border-radius:10px"></div>
         </div>
 
+        <div style="margin-bottom:25px">
+            <button class="btn btn-primary" style="width:100%; height:50px" onclick="openQA()">＋ 新增 SOP 問題內容</button>
+        </div>
+
         <div style="display:flex; gap:10px">
-            <button class="btn btn-ghost" style="flex:1" onclick="closeAdmin()">關閉</button>
+            <button class="btn btn-ghost" style="flex:1" onclick="closeAdmin()">取消</button>
             <button class="btn btn-primary" style="flex:1" onclick="saveAdminSettings()">儲存並發布變更</button>
         </div>
     </div>
@@ -103,183 +116,33 @@
 
 <div class="modal-bg" id="qaModal">
     <div class="modal">
-        <h2 id="mTitle" style="margin-bottom:20px">編輯 SOP</h2>
+        <h2 id="mTitle" style="margin-bottom:20px">編輯 SOP 內容</h2>
         <div class="field"><label>所屬類別</label><select id="fTag"></select></div>
         <div class="field"><label>問題標題</label><input type="text" id="fQ"></div>
         
         <div id="conversationsContainer">
-            <label style="font-size:14px; font-weight:700">對話與步驟對應 (無限新增)</label>
-            </div>
+            <label style="font-size:14px; font-weight:700">對話話術與處理步驟 (無限新增)</label>
+        </div>
         
-        <button class="btn btn-ghost" style="width:100%; margin:10px 0 20px" onclick="addConvField()">＋ 新增一組對話情境</button>
+        <button class="btn btn-ghost" style="width:100%; margin:10px 0 20px" onclick="addConvField()">＋ 新增一組對話與步驟</button>
 
         <div style="display:flex; gap:10px">
-            <button class="btn btn-ghost" style="flex:1" onclick="closeQA()">取消</button>
-            <button class="btn btn-primary" style="flex:1" id="saveBtn" onclick="submitToCloud()">更新至 GitHub 雲端</button>
+            <button class="btn btn-ghost" style="flex:1" onclick="closeQA()">返回管理</button>
+            <button class="btn btn-primary" style="flex:1" id="saveBtn" onclick="submitToCloud()">更新至雲端</button>
         </div>
     </div>
 </div>
 
 <script>
 // --- 資料儲存區 (會被自動更新) ---
-let categories = [
-    {id:"gate", name:"柵門問題", order:1},
-    {id:"fee", name:"繳費問題", order:2},
-    {id:"ticket", name:"發票載具", order:3}
-];
+let categories = [{id:"gate",name:"柵門問題",order:1},{id:"fee",name:"繳費問題",order:2},{id:"ticket",name:"發票載具",order:3}];
 let qaData = [];
 
 // --- 初始狀態 ---
-let adminMode = false;
 let editingId = null;
 let currentFilter = 'all';
 
 // --- 管理模式功能 ---
 function openAdmin() {
     document.getElementById('adminModal').classList.add('open');
-    document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
-    renderCatManager();
-}
-function closeAdmin() { document.getElementById('adminModal').classList.remove('open'); }
-
-function renderCatManager() {
-    const container = document.getElementById('categoryManagerList');
-    container.innerHTML = categories.sort((a,b)=>a.order-b.order).map((c, i) => `
-        <div style="display:flex; gap:10px; margin-bottom:8px">
-            <input type="text" value="${c.name}" onchange="updateCat(${i}, 'name', this.value)" style="flex:3">
-            <input type="number" value="${c.order}" onchange="updateCat(${i}, 'order', this.value)" style="flex:1">
-        </div>
-    `).join('');
-}
-function updateCat(i, key, val) { categories[i][key] = key === 'order' ? parseInt(val) : val; }
-
-function saveAdminSettings() {
-    localStorage.setItem('gh_token', document.getElementById('ghToken').value);
-    localStorage.setItem('gh_repo', 'topallpark/parking-qa'); // 固定倉庫
-    submitToCloud(true);
-}
-
-// --- 渲染前台 ---
-function render() {
-    const row = document.getElementById('tagRow');
-    const sortedCats = [...categories].sort((a,b)=>a.order-a.order);
-    row.innerHTML = `<span class="tag ${currentFilter==='all'?'active':''}" onclick="setFilter('all')">全部</span>` +
-        sortedCats.map(c => `<span class="tag ${currentFilter===c.id?'active':''}" onclick="setFilter('${c.id}')">${c.name}</span>`).join('');
-
-    const kw = document.getElementById('searchInput').value.toLowerCase();
-    const list = document.getElementById('qaList');
-    const filtered = qaData.filter(d => (currentFilter==='all' || d.tag===currentFilter) && d.q.toLowerCase().includes(kw));
-
-    list.innerHTML = filtered.map(item => `
-        <div class="qa-card" onclick="this.classList.toggle('open')">
-            <div class="qa-header">
-                <span class="q-badge">${categories.find(c=>c.id===item.tag)?.name || '其他'}</span>
-                <span class="q-text">${item.q}</span>
-                ${localStorage.getItem('gh_token') ? `<button class="btn btn-ghost" style="font-size:12px; padding:4px 8px" onclick="event.stopPropagation();editSOP(${item.id})">編輯</button>` : ''}
-            </div>
-            <div class="qa-body">
-                ${item.convs.map((c, i) => `
-                    <div class="conv-group">
-                        <span class="conv-label">情境/對話 ${i+1}</span>
-                        <div class="conv-intro">${c.intro}</div>
-                        ${c.steps.split('\n').filter(s=>s.trim()).map((s, si) => `
-                            <div class="conv-step"><div class="step-n">${si+1}</div>${s}</div>
-                        `).join('')}
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `).join('');
-}
-function setFilter(t) { currentFilter = t; render(); }
-
-// --- 編輯器邏輯 (無限組對應) ---
-function addConvField(intro = '', steps = '') {
-    const container = document.getElementById('conversationsContainer');
-    const div = document.createElement('div');
-    div.className = 'edit-conv-item';
-    div.innerHTML = `
-        <button onclick="this.parentElement.remove()" style="position:absolute; right:10px; top:10px; border:none; background:none; cursor:pointer; color:red">✕ 刪除</button>
-        <div class="field"><label>對話話術</label><input type="text" class="edit-intro" value="${intro}"></div>
-        <div class="field"><label>處理步驟 (每行一步)</label><textarea class="edit-steps" style="height:80px">${steps}</textarea></div>
-    `;
-    container.appendChild(div);
-}
-
-function editSOP(id) {
-    editingId = id;
-    const item = qaData.find(d => d.id === id);
-    document.getElementById('fTag').innerHTML = categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-    document.getElementById('fTag').value = item.tag;
-    document.getElementById('fQ').value = item.q;
-    document.getElementById('conversationsContainer').innerHTML = '<label style="font-size:14px; font-weight:700">對話與步驟對應 (無限新增)</label>';
-    item.convs.forEach(c => addConvField(c.intro, c.steps));
-    document.getElementById('qaModal').classList.add('open');
-}
-
-function openQA() {
-    editingId = null;
-    document.getElementById('fQ').value = '';
-    document.getElementById('fTag').innerHTML = categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-    document.getElementById('conversationsContainer').innerHTML = '<label style="font-size:14px; font-weight:700">對話與步驟對應 (無限新增)</label>';
-    addConvField();
-    document.getElementById('qaModal').classList.add('open');
-}
-function closeQA() { document.getElementById('qaModal').classList.remove('open'); }
-
-// --- 雲端同步 ---
-async function submitToCloud(isAdminSave = false) {
-    const token = localStorage.getItem('gh_token');
-    const repo = 'topallpark/parking-qa';
-    if(!token) return alert("請先設定 Token");
-
-    if(!isAdminSave) {
-        const convItems = document.querySelectorAll('.edit-conv-item');
-        const convs = Array.from(convItems).map(item => ({
-            intro: item.querySelector('.edit-intro').value,
-            steps: item.querySelector('.edit-steps').value
-        }));
-        const newItem = { id: editingId || Date.now(), tag: document.getElementById('fTag').value, q: document.getElementById('fQ').value, convs };
-        if(editingId) qaData[qaData.findIndex(d=>d.id===editingId)] = newItem;
-        else qaData.push(newItem);
-    }
-
-    const btn = isAdminSave ? null : document.getElementById('saveBtn');
-    if(btn) { btn.disabled = true; btn.textContent = "同步中..."; }
-
-    try {
-        const url = `https://api.github.com/repos/${repo}/contents/index.html`;
-        const res = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
-        const fileData = await res.json();
-        const oldContent = decodeURIComponent(escape(atob(fileData.content)));
-        
-        const dataMarker = "// --- 資料儲存區";
-        const endMarker = "// --- 初始狀態";
-        const newDataCode = `// --- 資料儲存區 (會被自動更新) ---\nlet categories = ${JSON.stringify(categories)};\nlet qaData = ${JSON.stringify(qaData)};\n\n`;
-        const newFull = oldContent.substring(0, oldContent.indexOf(dataMarker)) + newDataCode + oldContent.substring(oldContent.indexOf(endMarker));
-
-        await fetch(url, {
-            method: 'PUT',
-            headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Update SOP Data', content: btoa(unescape(encodeURIComponent(newFull))), sha: fileData.sha })
-        });
-        alert("✅ 同步成功！網頁將在 1 分鐘內更新。");
-        closeQA(); closeAdmin(); render();
-    } catch (e) { alert("同步失敗，請檢查 Token 與權限。"); }
-    finally { if(btn) { btn.disabled = false; btn.textContent = "更新至 GitHub 雲端"; } }
-}
-
-// 產生新增按鈕 (若已登入)
-if(localStorage.getItem('gh_token')) {
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-primary';
-    btn.style = 'position:fixed; bottom:30px; right:30px; border-radius:50px; padding:18px 30px; box-shadow:0 10px 20px rgba(26,86,219,0.3)';
-    btn.textContent = '＋ 新增 SOP 問題';
-    btn.onclick = openQA;
-    document.body.appendChild(btn);
-}
-
-render();
-</script>
-</body>
-</html>
+    document.getElementById('ghToken').value = localStorage.getItem('gh_token') ||
