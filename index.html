@@ -3,220 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>停車場客服 SOP 雲端同步版</title>
+    <title>停車場客服 SOP 系統</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* 沿用之前的樣式 */
+        /* --- 質感介面設計 --- */
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        :root{ --bg:#F5F4F0; --surface:#FFF; --accent:#1A56DB; --border:rgba(0,0,0,0.1); --r:10px; }
-        body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);padding-bottom:100px}
-        header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;position:sticky;top:0;z-index:100}
-        .btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);cursor:pointer;font-size:13px}
-        .btn-primary{background:var(--accent);color:white}
-        main{max-width:800px;margin:20px auto;padding:0 15px}
+        :root{ --bg:#F8F9FA; --surface:#FFF; --accent:#1A56DB; --text:#1F2937; --border:#E5E7EB; --r:12px; }
+        body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding-bottom:60px}
         
-        /* GitHub 設定區 */
-        .github-config{background:#111827;color:white;padding:15px;border-radius:var(--r);margin-bottom:20px;display:none}
-        .github-config input{background:#374151;border:1px solid #4B5563;color:white;padding:5px;margin:5px;border-radius:4px;font-size:12px}
+        header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;position:sticky;top:0;z-index:100;justify-content:space-between;box-shadow:0 1px 2px rgba(0,0,0,0.03)}
+        .logo-area{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+        .logo-icon{background:var(--accent);color:white;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:bold;font-size:18px}
         
-        .admin-bar{background:#EBF5FF;padding:15px;border-radius:var(--r);margin-bottom:15px;border:1px solid #BFDBFE}
-        .qa-card{background:white;border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
-        .qa-header{padding:12px;cursor:pointer;display:flex;align-items:center;gap:10px}
-        .qa-body{padding:15px;display:none;background:#F9FAFB;border-top:1px solid var(--border)}
+        main{max-width:800px;margin:24px auto;padding:0 20px}
+        
+        /* 搜尋框與流暢標籤 */
+        .search-container{background:white;border:2px solid var(--border);border-radius:var(--r);padding:4px 18px;margin-bottom:20px;transition:0.2s;display:flex;align-items:center}
+        .search-container:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px rgba(26,86,219,0.1)}
+        .search-container input{border:none;outline:none;width:100%;height:48px;font-size:16px;font-family:inherit}
+
+        .tag-row{margin-bottom:24px;display:flex;gap:10px;flex-wrap:wrap}
+        .tag{padding:8px 18px;background:white;border:1px solid var(--border);border-radius:50px;font-size:14px;cursor:pointer;transition:0.2s;color:#4B5563;font-weight:500}
+        .tag:hover{background:#F3F4F6}
+        .tag.active{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 4px 10px rgba(26,86,219,0.2)}
+
+        /* QA 卡片流暢感 */
+        .qa-card{background:white;border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;transition:0.2s;cursor:pointer;overflow:hidden}
+        .qa-card:hover{border-color:#D1D5DB;transform:translateY(-1px);box-shadow:0 4px 6px rgba(0,0,0,0.05)}
+        .qa-header{padding:16px 20px;display:flex;align-items:center;gap:12px}
+        .q-badge{font-size:11px;background:#EFF6FF;color:var(--accent);padding:4px 10px;border-radius:6px;font-weight:700;text-transform:uppercase}
+        .q-text{flex:1;font-weight:700;font-size:16px}
+        .qa-body{padding:20px;display:none;background:#F9FAFB;border-top:1px solid var(--border);animation:slideDown 0.2s ease-out}
         .qa-card.open .qa-body{display:block}
-        .tag-row{margin-bottom:15px;display:flex;gap:5px;flex-wrap:wrap}
-        .tag{padding:4px 10px;background:white;border:1px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer}
-        .tag.active{background:var(--accent);color:white}
         
-        /* 彈窗 */
-        .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:200}
+        @keyframes slideDown{ from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
+
+        .a-intro{background:white;padding:14px;border-left:4px solid var(--accent);margin-bottom:16px;font-size:15px;border-radius:6px;box-shadow:0 1px 2px rgba(0,0,0,0.05);color:#374151}
+        .step{display:flex;gap:12px;margin-bottom:10px;font-size:15px}
+        .step-num{width:24px;height:24px;background:#DBEAFE;color:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0}
+
+        /* 介面按鈕 */
+        .btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;transition:0.2s;font-family:inherit}
+        .btn-primary{background:var(--accent);color:white;border:none}
+        .btn-primary:hover{opacity:0.9}
+
+        /* 彈窗設計 */
+        .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;z-index:200}
         .modal-bg.open{display:flex}
-        .modal{background:white;padding:20px;border-radius:12px;width:90%;max-width:500px}
-        textarea{width:100%;height:100px;margin:10px 0}
+        .modal{background:white;padding:28px;border-radius:16px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25)}
+        .field{margin-bottom:18px}
+        .field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:#4B5563}
+        .field input, .field select, .field textarea{width:100%;padding:10px;border:1px solid #D1D5DB;border-radius:8px;font-size:15px;font-family:inherit}
     </style>
 </head>
 <body>
 
 <header>
-    <strong style="flex:1">🅿️ 停車場 SOP 雲端系統</strong>
-    <button class="btn" onclick="toggleConfig()" style="margin-right:5px">⚙️ 設定 GitHub</button>
-    <button class="btn btn-primary" onclick="toggleAdmin()" id="adminBtn">進入後台</button>
+    <div class="logo-area" onclick="countLogoClick()">
+        <div class="logo-icon">P</div>
+        <strong style="font-size:18px; letter-spacing:-0.5px">停車場 SOP 系統</strong>
+    </div>
+    <div id="adminBtnContainer" style="display:none">
+        <button class="btn btn-primary" onclick="toggleAdmin()" id="adminBtn">進入後台</button>
+    </div>
 </header>
 
 <main>
-    <!-- GitHub API 連接設定 -->
-    <div id="githubConfig" class="github-config">
-        <h3>GitHub 自動同步設定</h3>
-        <p style="font-size:11px; color:#9CA3AF">設定後，按儲存會自動更新 GitHub 上的 index.html</p>
-        <input type="password" id="ghToken" placeholder="GitHub Token (Fine-grained)">
-        <input type="text" id="ghRepo" placeholder="帳號/倉庫名 (如: user/parking-sop)">
-        <button class="btn btn-primary" onclick="saveConfig()">儲存設定</button>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="搜尋問題或關鍵字..." oninput="render()">
     </div>
-
-    <div id="adminPanel" class="admin-bar" style="display:none">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-            <span><strong>管理模式</strong> (變更將直接推送到 GitHub)</span>
-            <button class="btn btn-primary" onclick="openModal()">＋新增問題</button>
-        </div>
-    </div>
-
     <div class="tag-row" id="tagRow"></div>
     <div id="qaList"></div>
 </main>
 
-<!-- 編輯視窗 -->
-<div class="modal-bg" id="qaModal">
+<div class="modal-bg" id="configModal">
     <div class="modal">
-        <h3 id="mTitle">編輯內容</h3>
-        <input type="text" id="fQ" placeholder="問題名稱" style="width:100%; padding:8px; margin-top:10px">
-        <textarea id="fIntro" placeholder="開頭回覆"></textarea>
-        <textarea id="fSteps" placeholder="處理步驟 (一行一對話)"></textarea>
-        <div style="text-align:right">
-            <button class="btn" onclick="closeModal()">取消</button>
-            <button class="btn btn-primary" id="saveBtn" onclick="submitToCloud()">更新並同步至 GitHub</button>
+        <h3>⚙️ GitHub 自動同步設定</h3>
+        <p style="font-size:13px; color:#6B6B6B; margin-bottom:20px">設定後，此裝置將開啟管理權限。</p>
+        <div class="field"><label>Token (Fine-grained)</label><input type="password" id="ghToken"></div>
+        <div class="field"><label>倉庫路徑 (帳號/倉庫)</label><input type="text" id="ghRepo"></div>
+        <div style="display:flex; gap:10px">
+            <button class="btn" style="flex:1" onclick="closeConfig()">關閉</button>
+            <button class="btn btn-primary" style="flex:1" onclick="saveConfig()">儲存設定</button>
         </div>
     </div>
 </div>
 
-<script>
-// --- 資料區 (GitHub 更新時會重寫這塊) ---
-let categories = {"gate":"柵門問題","fee":"繳費問題","ticket":"發票/載具","other":"其他"};
-let qaData = [
-    {id:1,tag:'gate',q:'柵門打不開',intro:'你好，請問有繳費了嗎？',steps:['尚未繳費：請前往繳費機','已繳費：請提供車牌我幫您開啟']}
-];
-
-let adminMode = false;
-let editingId = null;
-
-// --- 初始化 ---
-function render() {
-    const row = document.getElementById('tagRow');
-    row.innerHTML = '<span class="tag active">全部</span>' + Object.values(categories).map(c => `<span class="tag">${c}</span>`).join('');
-    
-    const list = document.getElementById('qaList');
-    list.innerHTML = qaData.map(item => `
-        <div class="qa-card" onclick="this.classList.toggle('open')">
-            <div class="qa-header">
-                <span style="font-size:11px; background:#E5E7EB; padding:2px 6px; border-radius:4px">${categories[item.tag] || '其他'}</span>
-                <b style="flex:1">${item.q}</b>
-                ${adminMode ? `<button class="btn" onclick="event.stopPropagation();editItem(${item.id})">改</button>` : ''}
-            </div>
-            <div class="qa-body">
-                <div style="color:blue; margin-bottom:10px">話術：${item.intro}</div>
-                ${item.steps.map((s,i)=>`<div>${i+1}. ${s}</div>`).join('')}
-            </div>
+<div class="modal-bg" id="qaModal">
+    <div class="modal">
+        <h3 id="mTitle">編輯內容</h3>
+        <div class="field"><label>問題類別</label><select id="fTag"></select></div>
+        <div class="field"><label>問題名稱</label><input type="text" id="fQ"></div>
+        <div class="field"><label>對話話術</label><input type="text" id="fIntro"></div>
+        <div class="field"><label>處理步驟 (每行一動)</label><textarea id="fSteps" style="height:120px"></textarea></div>
+        <div style="display:flex; gap:10px">
+            <button class="btn" style="flex:1" onclick="closeQA()">取消</button>
+            <button class="btn btn-primary" style="flex:1" id="saveBtn" onclick="submitToCloud('sop')">更新並發布</button>
         </div>
-    `).join('');
-}
+        ${editingId ? `<button onclick="deleteItem()" style="width:100%; margin-top:15px; color:red; background:none; border:none; cursor:pointer; font-size:13px">刪除此項目</button>` : ''}
+    </div>
+</div>
 
-// --- GitHub API 邏輯 ---
-async function submitToCloud() {
-    const token = localStorage.getItem('gh_token');
-    const repo = localStorage.getItem('gh_repo');
-    
-    if(!token || !repo) {
-        alert("請先點擊上方『設定 GitHub』填入 Token 與倉庫名稱");
-        return;
-    }
-
-    const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    btn.textContent = "傳送中...";
-
-    // 1. 更新本地數據陣列
-    const newItem = {
-        id: editingId || Date.now(),
-        tag: 'gate',
-        q: document.getElementById('fQ').value,
-        intro: document.getElementById('fIntro').value,
-        steps: document.getElementById('fSteps').value.split('\n').filter(x=>x)
-    };
-
-    if(editingId) {
-        const idx = qaData.findIndex(d => d.id === editingId);
-        qaData[idx] = newItem;
-    } else {
-        qaData.push(newItem);
-    }
-
-    try {
-        // 2. 獲取目前檔案的 SHA (GitHub API 要求更新必須帶 SHA)
-        const url = `https://api.github.com/repos/${repo}/contents/index.html`;
-        const res = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
-        const fileData = await res.json();
-        const sha = fileData.sha;
-        const oldContent = decodeURIComponent(escape(atob(fileData.content)));
-
-        // 3. 替換舊代碼中的資料區塊
-        const dataMarker = "// --- 資料區";
-        const endMarker = "// --- 初始化";
-        const newCodeSegment = `${dataMarker} (GitHub 更新時會重寫這塊) ---\nlet categories = ${JSON.stringify(categories)};\nlet qaData = ${JSON.stringify(qaData)};\n\n`;
-        
-        const startIdx = oldContent.indexOf(dataMarker);
-        const endIdx = oldContent.indexOf(endMarker);
-        const newFullContent = oldContent.substring(0, startIdx) + newCodeSegment + oldContent.substring(endIdx);
-
-        // 4. 推送到 GitHub
-        const putRes = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: `Update SOP: ${newItem.q}`,
-                content: btoa(unescape(encodeURIComponent(newFullContent))),
-                sha: sha
-            })
-        });
-
-        if(putRes.ok) {
-            alert("✅ 同步成功！網頁約在 1 分鐘內更新。");
-            closeModal();
-            render();
-        } else {
-            const err = await putRes.json();
-            throw new Error(err.message);
-        }
-    } catch (e) {
-        alert("❌ 同步失敗: " + e.message);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = "更新並同步至 GitHub";
-    }
-}
-
-// --- 其他介面功能 ---
-function toggleAdmin() {
-    adminMode = !adminMode;
-    document.getElementById('adminPanel').style.display = adminMode ? 'block' : 'none';
-    document.getElementById('adminBtn').textContent = adminMode ? '退出後台' : '進入後台';
-    render();
-}
-function toggleConfig() {
-    const el = document.getElementById('githubConfig');
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
-    document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
-    document.getElementById('ghRepo').value = localStorage.getItem('gh_repo') || '';
-}
-function saveConfig() {
-    localStorage.setItem('gh_token', document.getElementById('ghToken').value);
-    localStorage.setItem('gh_repo', document.getElementById('ghRepo').value);
-    alert("設定已儲存至此瀏覽器");
-    toggleConfig();
-}
-function editItem(id) {
-    editingId = id;
-    const item = qaData.find(d => d.id === id);
-    document.getElementById('fQ').value = item.q;
-    document.getElementById('fIntro').value = item.intro;
-    document.getElementById('fSteps').value = item.steps.join('\n');
-    openModal();
-}
-function openModal() { document.getElementById('qaModal').classList.add('open'); }
-function closeModal() { document.getElementById('qaModal').classList.remove('open'); editingId = null; }
-
-render();
-</script>
-</body>
-</html>
+<script>
+// --- 資料區 (可自動同步) ---
+let categoryList = [
+    {id:"gate", name:"柵門問題", order:1},
+    {id
